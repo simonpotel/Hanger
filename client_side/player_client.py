@@ -3,6 +3,7 @@ import json
 from client_side.player import Player
 from loguru import logger
 
+
 class PlayerClient:
     def __init__(self, ip='127.0.0.1', port=65432):
         """
@@ -62,17 +63,19 @@ class PlayerClient:
                 try:
                     positions = json.loads(positions)
                     for p in positions:
-                        player_id = p['id']
-                        if player_id != self.player_id:
-                            player_uuid = p['uuid']
-                            if player_id in self.players:
+                        if p['id'] != self.player_id:
+                            if p['id'] in self.players:
+                                player = self.players[p['id']]
                                 if 'x' in p['state'] and 'y' in p['state']:
-                                    self.players[player_id].entity.update_position(
+                                    player.entity.update_position(
                                         (p['state']['x'], p['state']['y']))
                             else:
-                                if 'x' in p['state'] and 'y' in p['state']:
-                                    self.players[player_id] = Player(
-                                        player_id, player_uuid, (p['state']['x'], p['state']['y']))
+                                self.players[p['id']] = Player(
+                                    p['id'], p['uuid'], (p['state']['x'], p['state']['y']))
+                        self.players[p['id']].entity.hp = p['hp']
+                        self.players[p['id']].entity.name = p['name']
+                        self.players[p['id']].entity.type = p['type']
+                        self.players[p['id']].entity.uuid = p['uuid']
                 except json.JSONDecodeError as e:
                     print(f"Error decoding JSON: {e}")
             elif message.startswith("DISCONNECT"):

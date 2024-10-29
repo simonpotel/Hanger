@@ -6,7 +6,7 @@ import time
 from loguru import logger
 from colorama import init, Fore
 from common.entity import Entity
-import uuid 
+import uuid
 
 init(autoreset=True)
 
@@ -54,11 +54,11 @@ class GameServer:
         # listen for incoming connections with a maximum of 10 connections (prevent DDOS, etc)
         server_socket.listen(10)
 
-        # start a thread to broadcast the positions of all clients
+        # start a thread to broadcast the all clients the informations
         logger.info(f"{Fore.GREEN}Server started and listening on {
                     self.ip}:{self.port}")
 
-        threading.Thread(target=self.broadcast_positions, daemon=True).start()
+        threading.Thread(target=self.broadcast, daemon=True).start()
 
         while True:  # loop to accept incoming connections
             # accept a new connection and start a new thread to handle it with the handle_client method
@@ -101,6 +101,7 @@ class GameServer:
                         with self.lock:  # update the client's position
                             client.entity.state['x'] = int(x)
                             client.entity.state['y'] = int(y)
+                            client.entity.reduce_hp_randomly()
             except Exception as e:
                 logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
                 break
@@ -109,12 +110,12 @@ class GameServer:
         self.remove_client(client)
         conn.close()  # close the connection between the server and the client
 
-    def broadcast_positions(self):
+    def broadcast(self):
         """
         method to broadcast the positions of all clients to all connected clients at regular intervals
         """
         while True:  # loop to broadcast positions
-            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state}
+            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp}
                          # create a list of client positions
                          for p in self.clients.values()]
             # create a message with the positions
