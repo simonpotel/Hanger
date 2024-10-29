@@ -10,7 +10,7 @@ class Entity():
         self.type = type  # 0 = None, 1 = Player, 2 = Enemy, 3 = NPC, 4 = Item, 5 = Obstacle
         self.position = position
         self.render = pygame.image.load(asset_path)
-        self.hp = 100 # 100 %
+        self.hp = 100  # 100 %
         self.render = pygame.transform.scale(self.render, (128, 128))
         self.state = {'x': 0, 'y': 0}
 
@@ -34,7 +34,8 @@ class Entity():
         screen.blit(name_text, name_rect)  # draw the name text in the screen
 
         # render the HP of the entity
-        hp_text = font.render(f'ID: {self.id} / HP: {self.hp}/100', True, color)
+        hp_text = font.render(
+            f'ID: {self.id} / HP: {self.hp}/100', True, color)
         # set the position of the HP text
         hp_rect = hp_text.get_rect(
             center=(self.position[0] + 64, self.position[1] + 138))

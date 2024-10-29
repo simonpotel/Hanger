@@ -1,5 +1,4 @@
-import pygame
-from common.entity import Entity
+from src.entities.entity import Entity
 
 class Player:
     def __init__(self, player_id, player_uuid, position):

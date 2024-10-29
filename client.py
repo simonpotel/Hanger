@@ -1,7 +1,7 @@
 import pygame
 import json
 import threading
-from client_side.player_client import PlayerClient
+from src.client_side.player_client import PlayerClient
 
 class GameClient:
     def __init__(self, width, height, config_path, logo_path):

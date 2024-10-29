@@ -1,6 +1,6 @@
 import socket
 import json
-from client_side.player import Player
+from src.entities.player import Player
 from loguru import logger
 
 

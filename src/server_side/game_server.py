@@ -5,24 +5,12 @@ import json
 import time
 from loguru import logger
 from colorama import init, Fore
-from common.entity import Entity
-import uuid
+from src.server_side.client_manager import ClientManager
 
 init(autoreset=True)
 
 logger.add("logs/game_server.log",
            format="{time} {level} {message}", level="DEBUG")
-
-
-class Client:
-    def __init__(self, conn, addr, client_id):
-        """
-        class to represent a client in the game (a client connected to the server)
-        """
-        self.conn = conn  # connection object to communicate with the client
-        self.addr = addr  # address of the client
-        self.entity = Entity(id=client_id, uuid=str(uuid.uuid4(
-        )), name="Joueur", position=(0, 0), asset_path="assets/dev.png", type=1)
 
 
 class GameServer:
@@ -75,7 +63,7 @@ class GameServer:
         """
         client_id = self.next_client_id
         self.next_client_id += 1
-        client = Client(conn, addr, client_id)
+        client = ClientManager(conn, addr, client_id)
 
         initial_message = f"ID {client_id} {client.entity.uuid};"
         # everyone will receive that new client joined
@@ -101,7 +89,7 @@ class GameServer:
                         with self.lock:  # update the client's position
                             client.entity.state['x'] = int(x)
                             client.entity.state['y'] = int(y)
-                            #client.entity.reduce_hp_randomly()
+                            # client.entity.reduce_hp_randomly()
             except Exception as e:
                 logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
                 break
