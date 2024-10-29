@@ -2,14 +2,16 @@ import pygame
 
 
 class Entity():
-    def __init__(self, id, name, uuid, position, asset_path):
+    def __init__(self, id, name, uuid, position, asset_path, type):
         self.id = id
         self.name = name
         self.uuid = uuid
+        self.type = type # 0 = None, 1 = Player, 2 = Enemy, 3 = NPC, 4 = Item, 5 = Obstacle
         self.position = position
         self.render = pygame.image.load(asset_path)
         self.hp = 100 # 100 %
         self.render = pygame.transform.scale(self.render, (128, 128))
+        self.state = {'x': 0, 'y': 0}
 
     def update_position(self, new_position):
         """
