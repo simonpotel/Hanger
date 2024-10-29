@@ -101,7 +101,7 @@ class GameServer:
                         with self.lock:  # update the client's position
                             client.entity.state['x'] = int(x)
                             client.entity.state['y'] = int(y)
-                            client.entity.reduce_hp_randomly()
+                            #client.entity.reduce_hp_randomly()
             except Exception as e:
                 logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
                 break
