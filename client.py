@@ -75,7 +75,6 @@ class GameClient:
         self.client.close()
         pygame.quit()
 
-# Usage
 if __name__ == "__main__":
     game_client = GameClient(width=1280, height=720, config_path='configs/host.json', logo_path='assets/server.png')
     game_client.run()   
