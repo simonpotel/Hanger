@@ -24,20 +24,38 @@ class Entity():
         """
         Draw the entity on the screen.
         """
-        screen.blit(self.render, self.position)  # draw the entity image on the screen
+        screen.blit(
+            self.render, self.position)  # draw the entity image on the screen
 
         # render the name of the entity
         name_text = font.render(self.name, True, color)
         # set the position of the name text
-        name_rect = name_text.get_rect(center=(self.position[0] + 64, self.position[1] - 10))
+        name_rect = name_text.get_rect(
+            center=(self.position[0] + 20, self.position[1] - 10))
         screen.blit(name_text, name_rect)  # draw the name text on the screen
 
         if extra:
-            # render the HP and ID of the entity
-            hp_text = font.render(f'ID: {self.id} / HP: {self.hp}/100', True, color)
-            # set the position of the HP text
-            hp_rect = hp_text.get_rect(center=(self.position[0] + 64, self.position[1] + 138))
+            # render the ID of the entity
+            id_text = font.render(f'ID: {self.id}', True, color)
+            # set the position of the ID text
+            id_rect = id_text.get_rect(
+                center=(self.position[0] + 64, self.position[1] + 138))
+            screen.blit(id_text, id_rect)  # draw the ID text on the screen
+
+            # render the HP of the entity
+            hp_text = font.render(f'{self.hp}/100', True, color)
+            # set the position of the HP text next to the name
+            hp_rect = hp_text.get_rect(
+                midleft=(name_rect.right + 10, name_rect.centery))
             screen.blit(hp_text, hp_rect)  # draw the HP text on the screen
+
+            # load and draw the heart icon next to the HP text
+            heart_icon = pygame.image.load('assets/heart.png')
+            heart_icon = pygame.transform.scale(heart_icon, (20, 20))
+            heart_rect = heart_icon.get_rect(
+                midleft=(hp_rect.right + 5, hp_rect.centery))
+            # draw the heart icon on the screen
+            screen.blit(heart_icon, heart_rect)
 
     def reduce_hp_randomly(self):
         """
