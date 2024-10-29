@@ -26,15 +26,17 @@ class PlayerClient:
         self.conn.sendall(message.encode())
 
     def receive_updates(self):
-        """
-        get the updates from the server. 
-        """
+        buffer = ""
         while True:
             try:
-                data = self.conn.recv(1024).decode()
+                data = self.conn.recv(4096).decode()
                 if not data:
                     break
-                self.handle_data(data)
+                buffer += data
+
+                while ";" in buffer:
+                    message, buffer = buffer.split(";", 1)
+                    self.handle_data(message)
             except Exception as e:
                 print(f"Error receiving data: {e}")
                 break
