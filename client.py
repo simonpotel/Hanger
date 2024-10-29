@@ -3,65 +3,79 @@ import json
 import threading
 from client_side.player_client import PlayerClient
 
+class GameClient:
+    def __init__(self, width, height, config_path, logo_path):
+        self.width = width
+        self.height = height
+        self.config_path = config_path
+        self.logo_path = logo_path
+        self.screen = None
+        self.font = None
+        self.client_logo = None
+        self.clock = None
+        self.client = None
+        self.running = True
 
-def main():
-    """
-    main function to run the game client.
-    """
-    pygame.init()  # initialize pygame
+    def setup_screen(self):
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("Hungry Client DEV")
 
-    WIDTH, HEIGHT = 1280, 720  # screen dimensions
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))  # screen creation
-    pygame.display.set_caption("Hungry Client DEV")  # screen title
+    def load_assets(self):
+        self.font = pygame.font.Font(None, 24)
+        self.client_logo = pygame.image.load(self.logo_path)
+        pygame.display.set_icon(self.client_logo)
+        self.client_logo = pygame.transform.scale(self.client_logo, (128, 128))
 
-    WHITE = (255, 255, 255)  # white color
-    BLACK = (0, 0, 0)  # black color
+    def read_config(self):
+        with open(self.config_path, 'r') as f:
+            config = json.load(f)
+        return config.get('ip'), config.get('port')
 
-    font = pygame.font.Font(None, 24)  # font for the text
+    def start_client(self, ip, port):
+        self.client = PlayerClient(ip=ip, port=port)
+        threading.Thread(target=self.client.receive_updates, daemon=True).start()
 
-    client_logo = pygame.image.load("assets/server.png")  # client logo
-    pygame.display.set_icon(client_logo)  # set the client logo
-    client_logo = pygame.transform.scale(
-        client_logo, (128, 128))  # scale the client logo
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
 
-    clock = pygame.time.Clock()  # clock to control the fps
-    with open('configs/host.json', 'r') as f:  # read the host configuration
-        config = json.load(f)  # load the configuration
-    ip = config.get('ip')
-    port = config.get('port')
-    client = PlayerClient(ip=ip, port=port)  # create the player client object
-
-    # start the thread to receive updates from the server
-    threading.Thread(target=client.receive_updates, daemon=True).start()
-
-    running = True
-    while running:  # main loop
-        dt = clock.tick(120) / 1000  # get the delta time in seconds
-        for event in pygame.event.get():  # get the events from pygame
-            if event.type == pygame.QUIT:  # if the event is quit
-                running = False  # stop the loop
-
-        keys = pygame.key.get_pressed()  # controls of your player
+    def update(self, dt):
+        keys = pygame.key.get_pressed()
         if keys[pygame.K_z]:
-            client.position[1] -= client.speed * dt
+            self.client.position[1] -= self.client.speed * dt
         if keys[pygame.K_s]:
-            client.position[1] += client.speed * dt
+            self.client.position[1] += self.client.speed * dt
         if keys[pygame.K_q]:
-            client.position[0] -= client.speed * dt
+            self.client.position[0] -= self.client.speed * dt
         if keys[pygame.K_d]:
-            client.position[0] += client.speed * dt
+            self.client.position[0] += self.client.speed * dt
+        self.client.send_position()
 
-        client.send_position()  # send the position of the player to the server
+    def draw(self):
+        self.screen.fill((255, 255, 255))
+        for player in self.client.players.values():
+            player.draw(self.screen, self.font, (0, 0, 0))
+        pygame.display.flip()
 
-        screen.fill(WHITE)  # fill the background with white color
-        for player in client.players.values():  # draw the players in the screen
-            player.draw(screen, font, BLACK)  # draw the player
+    def run(self):
+        pygame.init()
+        self.setup_screen()
+        self.load_assets()
+        self.clock = pygame.time.Clock()
+        ip, port = self.read_config()
+        self.start_client(ip, port)
 
-        pygame.display.flip()  # update the screen
+        while self.running:
+            dt = self.clock.tick(120) / 1000
+            self.handle_events()
+            self.update(dt)
+            self.draw()
 
-    client.close()  # close the connection
-    pygame.quit()  # quit pygame
+        self.client.close()
+        pygame.quit()
 
-
+# Usage
 if __name__ == "__main__":
-    main()
+    game_client = GameClient(width=1280, height=720, config_path='configs/host.json', logo_path='assets/server.png')
+    game_client.run()   
