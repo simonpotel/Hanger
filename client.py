@@ -55,7 +55,7 @@ class GameClient:
     def draw(self):
         self.screen.fill((255, 255, 255))
         for player in self.client.players.values():
-            player.draw(self.screen, self.font, (0, 0, 0))
+            player.entity.draw(self.screen, self.font, (0, 0, 0))
         pygame.display.flip()
 
     def run(self):

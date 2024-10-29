@@ -1,7 +1,7 @@
 import socket
 import json
 from client_side.player import Player
-
+from loguru import logger
 
 class PlayerClient:
     def __init__(self, ip='127.0.0.1', port=65432):
@@ -56,6 +56,7 @@ class PlayerClient:
                 self.player_uuid = player_uuid
                 self.players[self.player_id] = Player(
                     self.player_id, self.player_uuid, self.position)
+                logger.info('My player id is %s', self.player_id)
             elif message.startswith("POSITIONS"):
                 _, positions = message.split(" ", 1)
                 try:
@@ -66,7 +67,7 @@ class PlayerClient:
                             player_uuid = p['uuid']
                             if player_id in self.players:
                                 if 'x' in p['state'] and 'y' in p['state']:
-                                    self.players[player_id].update_position(
+                                    self.players[player_id].entity.update_position(
                                         (p['state']['x'], p['state']['y']))
                             else:
                                 if 'x' in p['state'] and 'y' in p['state']:
