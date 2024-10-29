@@ -8,8 +8,7 @@ from colorama import init, Fore
 
 init(autoreset=True)
 
-logger.add("logs/game_server.log",
-           format="{time} {level} {message}", level="DEBUG")
+logger.add("logs/game_server.log",format="{time} {level} {message}", level="DEBUG")
 
 
 class GameServer:
@@ -27,8 +26,7 @@ class GameServer:
             self.ip = config.get('ip')
             self.port = config.get('port')
 
-        logger.info(f"{Fore.GREEN}Server initialized with IP: {
-                    self.ip}, Port: {self.port}")
+        logger.info(f"{Fore.GREEN}Server initialized with IP: {self.ip}, Port: {self.port}")
 
     def start_server(self):
         """
@@ -42,8 +40,7 @@ class GameServer:
         server_socket.listen(10)
 
         # start a thread to broadcast the positions of all players
-        logger.info(f"{Fore.GREEN}Server started and listening on {
-                    self.ip}:{self.port}")
+        logger.info(f"{Fore.GREEN}Server started and listening on {self.ip}:{self.port}")
 
         threading.Thread(target=self.broadcast_positions, daemon=True).start()
 
