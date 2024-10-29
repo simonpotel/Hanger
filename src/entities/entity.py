@@ -20,26 +20,24 @@ class Entity():
         """
         self.position = new_position
 
-    def draw(self, screen, font, color):
+    def draw(self, screen, font, color, extra):
         """
-        draw the entity in the screen.
+        Draw the entity on the screen.
         """
-        screen.blit(
-            self.render, self.position)  # draw the entity image in the screen
+        screen.blit(self.render, self.position)  # draw the entity image on the screen
+
         # render the name of the entity
         name_text = font.render(self.name, True, color)
         # set the position of the name text
-        name_rect = name_text.get_rect(
-            center=(self.position[0] + 64, self.position[1] - 10))
-        screen.blit(name_text, name_rect)  # draw the name text in the screen
+        name_rect = name_text.get_rect(center=(self.position[0] + 64, self.position[1] - 10))
+        screen.blit(name_text, name_rect)  # draw the name text on the screen
 
-        # render the HP of the entity
-        hp_text = font.render(
-            f'ID: {self.id} / HP: {self.hp}/100', True, color)
-        # set the position of the HP text
-        hp_rect = hp_text.get_rect(
-            center=(self.position[0] + 64, self.position[1] + 138))
-        screen.blit(hp_text, hp_rect)  # draw the HP text in the screen
+        if extra:
+            # render the HP and ID of the entity
+            hp_text = font.render(f'ID: {self.id} / HP: {self.hp}/100', True, color)
+            # set the position of the HP text
+            hp_rect = hp_text.get_rect(center=(self.position[0] + 64, self.position[1] + 138))
+            screen.blit(hp_text, hp_rect)  # draw the HP text on the screen
 
     def reduce_hp_randomly(self):
         """

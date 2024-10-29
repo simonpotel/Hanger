@@ -17,6 +17,7 @@ class PlayerClient:
         self.player_uuid = None  # player uuid will be assigned by the server
         # players in the game (list of Player objects) fetched by handle_data
         self.players = {}
+        self.player = None 
         self.speed = 300  # speed of the player in pixels per second for the movement
 
     def send_position(self):

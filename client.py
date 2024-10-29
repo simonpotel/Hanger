@@ -55,7 +55,13 @@ class GameClient:
     def draw(self):
         self.screen.fill((255, 255, 255))
         for player in self.client.players.values():
-            player.entity.draw(self.screen, self.font, (0, 0, 0))
+            if player.entity.id == self.client.player_id:
+                self.client.player = player
+            extra = True
+            if self.client.player is not None: 
+                if (abs(player.entity.position[0] - self.client.player.entity.position[0])**2 + abs(player.entity.position[1] - self.client.player.entity.position[1])**2)**0.5 > 500:
+                    extra = False 
+            player.entity.draw(self.screen, self.font, (0, 0, 0), extra)
         pygame.display.flip()
 
     def run(self):
