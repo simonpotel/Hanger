@@ -34,7 +34,7 @@ class Entity():
         screen.blit(name_text, name_rect)  # draw the name text in the screen
 
         # render the HP of the entity
-        hp_text = font.render(f'HP: {self.hp}/100', True, color)
+        hp_text = font.render(f'ID: {self.id} / HP: {self.hp}/100', True, color)
         # set the position of the HP text
         hp_rect = hp_text.get_rect(
             center=(self.position[0] + 64, self.position[1] + 138))
