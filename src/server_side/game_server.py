@@ -65,7 +65,7 @@ class GameServer:
         self.next_client_id += 1
         client = ClientManager(conn, addr, client_id)
 
-        initial_message = f"ID {client_id} {client.entity.uuid};"
+        initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
         # everyone will receive that new client joined
         conn.sendall(initial_message.encode())
 
@@ -103,7 +103,7 @@ class GameServer:
         method to broadcast the positions of all clients to all connected clients at regular intervals
         """
         while True:  # loop to broadcast positions
-            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp}
+            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
                          # create a list of client positions
                          for p in self.clients.values()]
             # create a message with the positions

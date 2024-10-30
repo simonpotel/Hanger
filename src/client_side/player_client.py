@@ -53,11 +53,11 @@ class PlayerClient:
         messages = data.split(";")
         for message in messages:
             if message.startswith("ID"):
-                _, player_id, player_uuid = message.split()
+                _, player_id, player_uuid, player_asset_path, player_type = message.split()
                 self.player_id = int(player_id)
                 self.player_uuid = player_uuid
                 self.players[self.player_id] = Player(
-                    self.player_id, self.player_uuid, self.position)
+                    self.player_id, self.player_uuid, self.position, player_asset_path)
                 logger.info('My player id is %s', self.player_id)
             elif message.startswith("POSITIONS"):
                 _, positions = message.split(" ", 1)
@@ -72,7 +72,7 @@ class PlayerClient:
                                         (p['state']['x'], p['state']['y']))
                             else:
                                 self.players[p['id']] = Player(
-                                    p['id'], p['uuid'], (p['state']['x'], p['state']['y']))
+                                    p['id'], p['uuid'], (p['state']['x'], p['state']['y']), p['asset_path'])
                         self.players[p['id']].entity.hp = p['hp']
                         self.players[p['id']].entity.name = p['name']
                         self.players[p['id']].entity.type = p['type']

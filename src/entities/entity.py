@@ -13,6 +13,7 @@ class Entity():
         self.hp = 100  # 100 %
         self.render = pygame.transform.scale(self.render, (128, 128))
         self.state = {'x': 0, 'y': 0}
+        self.asset_path = asset_path
 
     def update_position(self, new_position):
         """
