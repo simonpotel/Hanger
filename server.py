@@ -1,4 +1,4 @@
-from server_side.game_server import GameServer
+from src.server_side.game_server import GameServer
 
 class ServerApp:
     def __init__(self, config_path, update_interval):

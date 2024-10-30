@@ -1,24 +1,26 @@
+import uuid
 import socket
 import threading
 import json
 import time
-from server_side.player import Player
 from loguru import logger
 from colorama import init, Fore
+from src.server_side.client_manager import ClientManager
 
 init(autoreset=True)
 
-logger.add("logs/game_server.log",format="{time} {level} {message}", level="DEBUG")
+logger.add("logs/game_server.log",
+           format="{time} {level} {message}", level="DEBUG")
 
 
 class GameServer:
     def __init__(self, config_path, update_interval):
         # intervals in seconds between broadcast data to all clients
         self.update_interval = update_interval
-        self.players = {}  # stock players object from class Player
+        self.clients = {}  # stock clients object from class client
         # garrant on multi-threading that only one thread can access the shared resource at a time
         self.lock = threading.Lock()
-        self.next_player_id = 1  # next player id to give to a new player
+        self.next_client_id = 1  # next client id to give to a new client
 
         # load the server configuration from a JSON file
         with open(config_path, 'r') as config_file:
@@ -26,7 +28,8 @@ class GameServer:
             self.ip = config.get('ip')
             self.port = config.get('port')
 
-        logger.info(f"{Fore.GREEN}Server initialized with IP: {self.ip}, Port: {self.port}")
+        logger.info(f"{Fore.GREEN}Server initialized with IP: {
+                    self.ip}, Port: {self.port}")
 
     def start_server(self):
         """
@@ -39,10 +42,11 @@ class GameServer:
         # listen for incoming connections with a maximum of 10 connections (prevent DDOS, etc)
         server_socket.listen(10)
 
-        # start a thread to broadcast the positions of all players
-        logger.info(f"{Fore.GREEN}Server started and listening on {self.ip}:{self.port}")
+        # start a thread to broadcast the all clients the informations
+        logger.info(f"{Fore.GREEN}Server started and listening on {
+                    self.ip}:{self.port}")
 
-        threading.Thread(target=self.broadcast_positions, daemon=True).start()
+        threading.Thread(target=self.broadcast, daemon=True).start()
 
         while True:  # loop to accept incoming connections
             # accept a new connection and start a new thread to handle it with the handle_client method
@@ -54,19 +58,19 @@ class GameServer:
 
     def handle_client(self, conn, addr):
         """
-        handle a new client connection by creating a new Player object and adding it to the list of players
+        handle a new client connection by creating a new client object and adding it to the list of clients
         this method will run in a separate thread for each client
         """
-        player_id = self.next_player_id
-        self.next_player_id += 1
-        player = Player(conn, addr, player_id)
+        client_id = self.next_client_id
+        self.next_client_id += 1
+        client = ClientManager(conn, addr, client_id)
 
-        initial_message = f"ID {player_id} {player.uuid};"
-        # everyone will receive that new player joined
+        initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
+        # everyone will receive that new client joined
         conn.sendall(initial_message.encode())
 
         with self.lock:
-            self.players[player_id] = player
+            self.clients[client_id] = client
 
         buffer = ""  # buffer to store incomplete messages
         while True:  # loop to receive data from the client
@@ -82,53 +86,54 @@ class GameServer:
                     # if the message is a position update
                     if message.startswith("POSITION"):
                         _, x, y = message.split()
-                        with self.lock:  # update the player's position
-                            player.state['x'] = int(x)
-                            player.state['y'] = int(y)
+                        with self.lock:  # update the client's position
+                            client.entity.state['x'] = int(x)
+                            client.entity.state['y'] = int(y)
+                            # client.entity.reduce_hp_randomly()
             except Exception as e:
                 logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
                 break
 
-        # remove the player from the list of players
-        self.remove_player(player)
+        # remove the client from the list of clients
+        self.remove_client(client)
         conn.close()  # close the connection between the server and the client
 
-    def broadcast_positions(self):
+    def broadcast(self):
         """
-        method to broadcast the positions of all players to all connected clients at regular intervals
+        method to broadcast the positions of all clients to all connected clients at regular intervals
         """
         while True:  # loop to broadcast positions
-            positions = [{'id': p.id, 'uuid': p.uuid, 'state': p.state}
-                         # create a list of player positions
-                         for p in self.players.values()]
+            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
+                         # create a list of client positions
+                         for p in self.clients.values()]
             # create a message with the positions
             message = f"POSITIONS {json.dumps(positions)};"
-            for player in self.players.values():  # send the message to all connected clients
+            for client in self.clients.values():  # send the message to all connected clients
                 try:
                     # send the message to the client
-                    player.conn.sendall(message.encode())
+                    client.conn.sendall(message.encode())
                 except Exception as e:
-                    logger.error(f"{Fore.RED}Error sending to player {
-                                 player.id}: {e}")
-                    self.remove_player(player)
+                    logger.error(f"{Fore.RED}Error sending to client {
+                                 client.entity.id}: {e}")
+                    self.remove_client(client)
             # wait for the specified interval before broadcasting again (avoid flooding the network)
             time.sleep(self.update_interval)
 
-    def remove_player(self, player):
+    def remove_client(self, client):
         """
-        method to remove a player from the list of players and send a disconnect message to all connected clients
+        method to remove a client from the list of clients and send a disconnect message to all connected clients
         """
-        with self.lock:  # remove the player from the list of players
-            if player.id in self.players:
-                del self.players[player.id]
-        player.conn.close()  # close the connection between the server and the client
-        logger.info(f"{Fore.BLUE}Player {player.id} disconnected")
+        with self.lock:  # remove the client from the list of clients
+            if client.entity.id in self.clients:
+                del self.clients[client.entity.id]
+        client.conn.close()  # close the connection between the server and the client
+        logger.info(f"{Fore.BLUE}client {client.entity.id} disconnected")
         disconnect_message = f"DISCONNECT {
-            player.id};"  # create a disconnect message
-        for p in self.players.values():  # send the disconnect message to all connected clients
+            client.entity.id};"  # create a disconnect message
+        for p in self.clients.values():  # send the disconnect message to all connected clients
             try:
                 # send the disconnect message to the client
                 p.conn.sendall(disconnect_message.encode())
             except Exception as e:
                 logger.error(
-                    f"{Fore.RED}Error sending disconnect message to player {p.id}: {e}")
+                    f"{Fore.RED}Error sending disconnect message to client {p.id}: {e}")

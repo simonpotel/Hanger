@@ -1,7 +1,7 @@
 import pygame
 import json
 import threading
-from client_side.player_client import PlayerClient
+from src.client_side.player_client import PlayerClient
 
 class GameClient:
     def __init__(self, width, height, config_path, logo_path):
@@ -54,8 +54,16 @@ class GameClient:
 
     def draw(self):
         self.screen.fill((255, 255, 255))
-        for player in self.client.players.values():
-            player.draw(self.screen, self.font, (0, 0, 0))
+        n_players = list(self.client.players.values()) 
+        for player in n_players:
+            print(player)
+            if player.entity.id == self.client.player_id:
+                self.client.player = player
+            extra = True
+            if self.client.player is not None: 
+                if (abs(player.entity.position[0] - self.client.player.entity.position[0])**2 + abs(player.entity.position[1] - self.client.player.entity.position[1])**2)**0.5 > 500:
+                    extra = False 
+            player.entity.draw(self.screen, self.font, (0, 0, 0), extra)
         pygame.display.flip()
 
     def run(self):
@@ -71,6 +79,7 @@ class GameClient:
             self.handle_events()
             self.update(dt)
             self.draw()
+            #print(self.client.players)
 
         self.client.close()
         pygame.quit()

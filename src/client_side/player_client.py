@@ -1,6 +1,7 @@
 import socket
 import json
-from client_side.player import Player
+from src.entities.player import Player
+from loguru import logger
 
 
 class PlayerClient:
@@ -16,6 +17,7 @@ class PlayerClient:
         self.player_uuid = None  # player uuid will be assigned by the server
         # players in the game (list of Player objects) fetched by handle_data
         self.players = {}
+        self.player = None 
         self.speed = 300  # speed of the player in pixels per second for the movement
 
     def send_position(self):
@@ -51,27 +53,30 @@ class PlayerClient:
         messages = data.split(";")
         for message in messages:
             if message.startswith("ID"):
-                _, player_id, player_uuid = message.split()
+                _, player_id, player_uuid, player_asset_path, player_type = message.split()
                 self.player_id = int(player_id)
                 self.player_uuid = player_uuid
                 self.players[self.player_id] = Player(
-                    self.player_id, self.player_uuid, self.position)
+                    self.player_id, self.player_uuid, self.position, player_asset_path)
+                logger.info('My player id is %s', self.player_id)
             elif message.startswith("POSITIONS"):
                 _, positions = message.split(" ", 1)
                 try:
                     positions = json.loads(positions)
                     for p in positions:
-                        player_id = p['id']
-                        if player_id != self.player_id:
-                            player_uuid = p['uuid']
-                            if player_id in self.players:
+                        if p['id'] != self.player_id:
+                            if p['id'] in self.players:
+                                player = self.players[p['id']]
                                 if 'x' in p['state'] and 'y' in p['state']:
-                                    self.players[player_id].update_position(
+                                    player.entity.update_position(
                                         (p['state']['x'], p['state']['y']))
                             else:
-                                if 'x' in p['state'] and 'y' in p['state']:
-                                    self.players[player_id] = Player(
-                                        player_id, player_uuid, (p['state']['x'], p['state']['y']))
+                                self.players[p['id']] = Player(
+                                    p['id'], p['uuid'], (p['state']['x'], p['state']['y']), p['asset_path'])
+                        self.players[p['id']].entity.hp = p['hp']
+                        self.players[p['id']].entity.name = p['name']
+                        self.players[p['id']].entity.type = p['type']
+                        self.players[p['id']].entity.uuid = p['uuid']
                 except json.JSONDecodeError as e:
                     print(f"Error decoding JSON: {e}")
             elif message.startswith("DISCONNECT"):
