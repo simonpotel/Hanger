@@ -56,7 +56,6 @@ class GameClient:
         self.screen.fill((255, 255, 255))
         n_players = list(self.client.players.values()) 
         for player in n_players:
-            print(player)
             if player.entity.id == self.client.player_id:
                 self.client.player = player
             extra = True
