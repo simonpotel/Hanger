@@ -3,3 +3,4 @@ host.json
 build/
 *.log
 logs/
+.DS_Store
