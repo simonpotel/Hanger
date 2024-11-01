@@ -51,7 +51,7 @@ class Entity():
             screen.blit(hp_text, hp_rect)  # draw the HP text on the screen
 
             # load and draw the heart icon next to the HP text
-            heart_icon = pygame.image.load('assets/heart.png')
+            heart_icon = pygame.image.load('assets/custom/heart.png')
             heart_icon = pygame.transform.scale(heart_icon, (20, 20))
             heart_rect = heart_icon.get_rect(
                 midleft=(hp_rect.right + 5, hp_rect.centery))

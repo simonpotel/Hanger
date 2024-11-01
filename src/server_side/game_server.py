@@ -6,6 +6,7 @@ import time
 from loguru import logger
 from colorama import init, Fore
 from src.server_side.client_manager import ClientManager
+from src.entities.monster import Monster
 
 init(autoreset=True)
 
@@ -17,10 +18,11 @@ class GameServer:
     def __init__(self, config_path, update_interval):
         # intervals in seconds between broadcast data to all clients
         self.update_interval = update_interval
+        self.monsters = {}  # stock entities object from class entity
         self.clients = {}  # stock clients object from class client
         # garrant on multi-threading that only one thread can access the shared resource at a time
         self.lock = threading.Lock()
-        self.next_client_id = 1  # next client id to give to a new client
+        self.next_entity_id = 1  # next client id to give to a new client
 
         # load the server configuration from a JSON file
         with open(config_path, 'r') as config_file:
@@ -48,6 +50,13 @@ class GameServer:
 
         threading.Thread(target=self.broadcast, daemon=True).start()
 
+        devMonster = Monster(self.next_entity_id, str(uuid.uuid4(
+        )), "Monster", (200, 200), "assets/custom/vh.png")
+        devMonster.entity.state['x'] = 200
+        devMonster.entity.state['y'] = 200
+        self.monsters[self.next_entity_id] = devMonster
+        self.next_entity_id += 1
+
         while True:  # loop to accept incoming connections
             # accept a new connection and start a new thread to handle it with the handle_client method
             # 1 client = 1 thread
@@ -61,11 +70,12 @@ class GameServer:
         handle a new client connection by creating a new client object and adding it to the list of clients
         this method will run in a separate thread for each client
         """
-        client_id = self.next_client_id
-        self.next_client_id += 1
+        client_id = self.next_entity_id
+        self.next_entity_id += 1
         client = ClientManager(conn, addr, client_id)
 
-        initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
+        initial_message = f"ID {client_id} {client.entity.uuid} {
+            client.entity.asset_path} {client.entity.type};"
         # everyone will receive that new client joined
         conn.sendall(initial_message.encode())
 
@@ -89,6 +99,7 @@ class GameServer:
                         with self.lock:  # update the client's position
                             client.entity.state['x'] = int(x)
                             client.entity.state['y'] = int(y)
+
                             # client.entity.reduce_hp_randomly()
             except Exception as e:
                 logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
@@ -103,9 +114,16 @@ class GameServer:
         method to broadcast the positions of all clients to all connected clients at regular intervals
         """
         while True:  # loop to broadcast positions
-            positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
-                         # create a list of client positions
-                         for p in self.clients.values()]
+            positions = []  # list to store the positions of all entities
+            clients_positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
+                     # create a list of client positions
+                     for p in self.clients.values()]
+        
+            # Add entities positions to the positions list
+            monsters_positions = [{'id': e.entity.id, 'uuid': e.entity.uuid, 'state': e.entity.state, 'type': e.entity.type, 'name': e.entity.name, 'hp': e.entity.hp, 'asset_path': e.entity.asset_path}
+                                for e in self.monsters.values()]
+            positions.extend(clients_positions)
+            positions.extend(monsters_positions)
             # create a message with the positions
             message = f"POSITIONS {json.dumps(positions)};"
             for client in self.clients.values():  # send the message to all connected clients

@@ -3,6 +3,7 @@ import json
 import threading
 from src.client_side.player_client import PlayerClient
 
+
 class GameClient:
     def __init__(self, width, height, config_path, logo_path):
         self.width = width
@@ -33,7 +34,8 @@ class GameClient:
 
     def start_client(self, ip, port):
         self.client = PlayerClient(ip=ip, port=port)
-        threading.Thread(target=self.client.receive_updates, daemon=True).start()
+        threading.Thread(target=self.client.receive_updates,
+                         daemon=True).start()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -54,14 +56,14 @@ class GameClient:
 
     def draw(self):
         self.screen.fill((255, 255, 255))
-        n_players = list(self.client.players.values()) 
+        n_players = list(self.client.players.values())
         for player in n_players:
             if player.entity.id == self.client.player_id:
                 self.client.player = player
             extra = True
-            if self.client.player is not None: 
+            if self.client.player is not None:
                 if (abs(player.entity.position[0] - self.client.player.entity.position[0])**2 + abs(player.entity.position[1] - self.client.player.entity.position[1])**2)**0.5 > 500:
-                    extra = False 
+                    extra = False
             player.entity.draw(self.screen, self.font, (0, 0, 0), extra)
         pygame.display.flip()
 
@@ -78,11 +80,13 @@ class GameClient:
             self.handle_events()
             self.update(dt)
             self.draw()
-            #print(self.client.players)
+            # print(self.client.players)
 
         self.client.close()
         pygame.quit()
 
+
 if __name__ == "__main__":
-    game_client = GameClient(width=1280, height=720, config_path='configs/host.json', logo_path='assets/server.png')
-    game_client.run()   
+    game_client = GameClient(
+        width=1280, height=720, config_path='configs/host.json', logo_path='assets/custom/vh.png')
+    game_client.run()
