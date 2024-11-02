@@ -97,16 +97,28 @@ class GameClient:
         # draw the entites of the game (using the tabs updated by handlers with server)
         self.screen.fill((255, 255, 255)) # fill the screen with white color (reset the screen)
         n_players = list(self.client.players.values())
-        for player in n_players: # do this for every players in the game
-            if player.id == self.client.player_id: 
-                self.client.player = player # update the player in the client side if needed in other part of the code
-            extra = True 
-            if self.client.player is not None: 
-                if (abs(player.position[0] - self.client.player.position[0])**2 + abs(player.position[1] - self.client.player.position[1])**2)**0.5 > 500:
-                    extra = False # distance between the player and the other player is > 500 so we don't draw the other player extra infos
-            player.draw(self.screen, self.font, (0, 0, 0), extra) # draw the player in the screen
-        pygame.display.flip() # update the screen
+
+        if self.client.player is not None:
+            # my player exists
+            # manage the camera offset to follow the player (ur own) in center of the game window
+            camera_offset_x = self.client.player.position[0] - self.width // 2 # camera offset x center
+            camera_offset_y = self.client.player.position[1] - self.height // 2  # camera offset y center
+
+            for player in n_players: # do this for every players in the game
+                if player.id == self.client.player_id:
+                    self.client.player = player  # update the player in the client side if needed in other part of the code
+                extra = True
+                if self.client.player is not None:
+                    if (abs(player.position[0] - self.client.player.position[0])**2 + abs(player.position[1] - self.client.player.position[1])**2)**0.5 > 500:
+                        extra = False  # distance between the player and the other player is > 500 so we don't draw the other player extra infos
+                
+                draw_position = (player.position[0] - camera_offset_x, player.position[1] - camera_offset_y) # position of the player on the screen (centered)
+                # draw the player in the screen
+                player.draw(self.screen, self.font, (0, 0, 0), extra, draw_position)  # write the player on the screen with the correct position (with offset)
+
+        pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
+    
 
     def run(self):
         # run the game
