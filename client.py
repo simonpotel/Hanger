@@ -34,8 +34,7 @@ class GameClient:
 
     def start_client(self, ip, port):
         self.client = PlayerClient(ip=ip, port=port)
-        threading.Thread(target=self.client.receive_updates,
-                         daemon=True).start()
+        threading.Thread(target=self.client.receive_updates, daemon=True).start()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -44,7 +43,7 @@ class GameClient:
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
-        if self.client.player == None:
+        if self.client.player is None:
             return
         self.client.player.anim_current_action = "Idle"
 
@@ -64,7 +63,6 @@ class GameClient:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[1] += self.client.speed * dt
             self.client.position[0] += self.client.speed * dt
-
         elif keys[pygame.K_z]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "up"
             self.client.position[1] -= self.client.speed * dt
@@ -106,7 +104,6 @@ class GameClient:
             self.handle_events()
             self.update(dt)
             self.draw()
-            # print(self.client.players)
 
         self.client.close()
         pygame.quit()

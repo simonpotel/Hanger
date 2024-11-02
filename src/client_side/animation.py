@@ -1,6 +1,5 @@
 import pygame
 
-
 class Animation:
     def __init__(self, asset_path, frame_width, frame_height, scale_factor=3):
         self.frame_width = frame_width
