@@ -20,7 +20,7 @@ class GameClient:
 
     def setup_screen(self):
         self.screen = pygame.display.set_mode((self.width, self.height)) # create the game window
-        pygame.display.set_caption("Hungry Client DEV") # set the game window title
+        pygame.display.set_caption("Hanger Client") # set the game window title
         pygame.mouse.set_visible(False)  # hide the default mouse cursor
         logger.info("Screen setup with width: {}, height: {}", self.width, self.height)
 
