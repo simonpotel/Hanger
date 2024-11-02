@@ -2,7 +2,7 @@ import pygame
 import json
 import threading
 from src.client_side.player_client import PlayerClient
-
+from loguru import logger
 
 class GameClient:
     def __init__(self, width, height, config_path, logo_path):
@@ -16,33 +16,42 @@ class GameClient:
         self.clock = None # pygame clock obj
         self.client = None # PlayerClient obj
         self.running = True 
+        logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}", width, height, config_path, logo_path)
 
     def setup_screen(self):
         self.screen = pygame.display.set_mode((self.width, self.height)) # create the game window
         pygame.display.set_caption("Hungry Client DEV") # set the game window title
+        logger.info("Screen setup with width: {}, height: {}", self.width, self.height)
 
     def load_assets(self):
         self.font = pygame.font.Font(None, 24) # load the font for the game
         self.client_logo = pygame.image.load(self.logo_path) # load the logo of the game
         pygame.display.set_icon(self.client_logo) # set the logo of the game    
         self.client_logo = pygame.transform.scale(self.client_logo, (128, 128)) # scale the logo if needed to 128x128
+        logger.info("Assets loaded successfully")
 
     def read_config(self):
         # this will return the config of configs/host.json to relation between client - server
-        with open(self.config_path, 'r') as f:
-            config = json.load(f)
-        return config.get('ip'), config.get('port') # return the ip and port of the server
+        try:
+            with open(self.config_path, 'r') as f:
+                config = json.load(f)
+            logger.info("Config read successfully from {}", self.config_path)
+            return config.get('ip'), config.get('port') # return the ip and port of the server
+        except Exception as e:
+            logger.error("Failed to read config: {}", e)
+            raise
 
     def start_client(self, ip, port):
         self.client = PlayerClient(ip=ip, port=port)
-        threading.Thread(target=self.client.receive_updates,
-                         daemon=True).start() # start the thread to receive updates from the server 
+        threading.Thread(target=self.client.receive_updates, daemon=True).start() # start the thread to receive updates from the server 
+        logger.info("Client started with IP: {}, Port: {}", ip, port)
 
     def handle_events(self):
         # handle the events of the game
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+                logger.info("Quit event detected, stopping the game")
 
     def update(self, dt):
         # manage the deplacement of your player (in client) and transmit to server
@@ -82,6 +91,7 @@ class GameClient:
             self.client.position[0] += self.client.speed * dt
 
         self.client.send_position()
+        logger.debug("Player position updated to: {}", self.client.position)
 
     def draw(self):
         # draw the entites of the game (using the tabs updated by handlers with server)
@@ -96,10 +106,12 @@ class GameClient:
                     extra = False # distance between the player and the other player is > 500 so we don't draw the other player extra infos
             player.draw(self.screen, self.font, (0, 0, 0), extra) # draw the player in the screen
         pygame.display.flip() # update the screen
+        logger.debug("Screen drawn with {} players", len(n_players))
 
     def run(self):
         # run the game
         pygame.init()
+        logger.info("Pygame initialized")
         self.setup_screen()
         self.load_assets()
         self.clock = pygame.time.Clock()
@@ -114,3 +126,4 @@ class GameClient:
 
         self.client.close() # close the connection with the server
         pygame.quit() # quit the game
+        logger.info("Game closed")

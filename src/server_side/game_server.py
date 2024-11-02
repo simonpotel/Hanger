@@ -3,6 +3,7 @@ import threading
 import json
 import time
 from src.server_side.client_manager import ClientManager
+from loguru import logger
 
 class GameServer:
     def __init__(self, config_path, update_interval):
@@ -17,31 +18,31 @@ class GameServer:
             self.ip = config.get('ip')
             self.port = config.get('port') 
 
+        logger.info(f"GameServer initialized with IP: {self.ip} and Port: {self.port}")
+
     def start_server(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create a socket object for the server side using TCP
         server_socket.bind((self.ip, self.port)) # bind the socket to the ip and port
         server_socket.listen(20) # listen to the clients (20 clients max)
 
+        logger.info("Server started and listening for connections")
+
         threading.Thread(target=self.broadcast, daemon=True).start() # start the thread to broadcast the data to the clients
 
         while True: # while the server is running 
-            # accept the connection from the clients and start a new thread to handle the clients
-            # 1 client = 1 thread
             client_socket, client_address = server_socket.accept()
+            logger.info(f"Accepted connection from {client_address}")
             threading.Thread(target=self.handle_client, args=(client_socket, client_address)).start()
 
     def handle_client(self, conn, addr):
-        # this function is used to handle a client connnection
-        # it will create a new client manager for the client and add it to the list of clients
-        # it will also handle the data received from the client
-        # and remove the client from the list of clients if the client disconnects
-        
         client_id = self.next_entity_id # get the id of the client
         self.next_entity_id += 1 # increment the id of the next entity
         client = ClientManager(conn, addr, client_id) # create a new client manager for the client
 
+        logger.info(f"Client {client_id} connected from {addr}")
+
         initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
-        conn.sendall(initial_message.encode()) # send the initial message to the client (it will be used by client to define the player)
+        conn.sendall(initial_message.encode()) # send the initial message to the client
 
         with self.lock:
             self.clients[client_id] = client
@@ -49,30 +50,29 @@ class GameServer:
         buffer = ""
         while True: # while the client is connected
             try:
-                data = conn.recv(1024).decode() # receive the data from the client
+                data = conn.recv(4096).decode() # receive the data from the client
                 if not data:
                     break
                 buffer += data
-                # we use a buffer here to avoid the loss of data if the message is too long
-                # with TCP, the message can be cut in multiple parts
                 while ";" in buffer: 
                     message, buffer = buffer.split(";", 1)
-                    # POSITION is used to update the position of the player when he is moving
                     if message.startswith("POSITION"):
-                        _, x, y, anim_current_action, anim_current_direction = message.split() # seperate the data from the message
+                        _, x, y, anim_current_action, anim_current_direction = message.split() # separate the data from the message
                         with self.lock:
                             client.entity.state['x'] = int(x) # update the x position of the player
                             client.entity.state['y'] = int(y) # update the y position of the player
                             client.entity.anim_current_action = anim_current_action # update the current action of the player
                             client.entity.anim_current_direction = anim_current_direction # update the current direction of the player
-            except Exception:
+                        logger.debug(f"Updated position for client {client_id}: x={x}, y={y}, action={anim_current_action}, direction={anim_current_direction}")
+            except Exception as e:
+                logger.error(f"Error handling client {client_id}: {e}")
                 break
 
         self.remove_client(client) # remove the client from the list of clients if the client disconnects
         conn.close() # close the connection with the client
+        logger.info(f"Client {client_id} disconnected")
 
     def broadcast(self):
-        # this function is used to broadcast the data to the clients (players)
         while True:
             entities_data = [] # list of entities data
             clients_data = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path, 'anim_current_action': p.entity.anim_current_action, 'anim_current_direction': p.entity.anim_current_direction}
@@ -87,13 +87,12 @@ class GameServer:
             for client in self.clients.values(): # send the message to all the clients
                 try:
                     client.conn.sendall(message.encode())
-                except Exception:
+                except Exception as e:
+                    logger.error(f"Error broadcasting to client {client.entity.id}: {e}")
                     self.remove_client(client)
             time.sleep(self.update_interval)
 
     def remove_client(self, client):
-        # this function is used to remove a client from the list of clients if the client disconnects
-        # or for other reasons
         with self.lock:
             if client.entity.id in self.clients:
                 del self.clients[client.entity.id]
@@ -102,5 +101,6 @@ class GameServer:
         for p in self.clients.values(): # send the message to all the clients
             try:
                 p.conn.sendall(disconnect_message.encode())
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Error sending disconnect message to client {p.entity.id}: {e}")
+        logger.info(f"Client {client.entity.id} removed")
