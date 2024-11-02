@@ -1,159 +1,106 @@
-import uuid
 import socket
 import threading
 import json
 import time
-from loguru import logger
-from colorama import init, Fore
 from src.server_side.client_manager import ClientManager
-from src.entities.entity import Entity
-
-init(autoreset=True)
-
-logger.add("logs/game_server.log",
-           format="{time} {level} {message}", level="DEBUG")
-
+from loguru import logger
 
 class GameServer:
     def __init__(self, config_path, update_interval):
-        # intervals in seconds between broadcast data to all clients
-        self.update_interval = update_interval
-        self.monsters = {}  # stock entities object from class entity
-        self.clients = {}  # stock clients object from class client
-        # garrant on multi-threading that only one thread can access the shared resource at a time
-        self.lock = threading.Lock()
-        self.next_entity_id = 1  # next client id to give to a new client
+        self.update_interval = update_interval # updates intervals between the server and the clients
+        self.monsters = {} # list of monsters
+        self.clients = {} # list of clients 
+        self.lock = threading.Lock() # lock to avoid multiple threads to access the same data
+        self.next_entity_id = 1 # id of the next entity
 
-        # load the server configuration from a JSON file
         with open(config_path, 'r') as config_file:
-            config = json.load(config_file)
+            config = json.load(config_file) # load the config file
             self.ip = config.get('ip')
-            self.port = config.get('port')
+            self.port = config.get('port') 
 
-        logger.info(f"{Fore.GREEN}Server initialized with IP: {
-                    self.ip}, Port: {self.port}")
+        logger.info(f"GameServer initialized with IP: {self.ip} and Port: {self.port}")
 
     def start_server(self):
-        """
-        start the game server and listen for incoming connections from clients on the specified IP and port
-        """
-        # create a socket object IPV4 and TCP
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # bind the socket to the ip and port specified in the configuration file
-        server_socket.bind((self.ip, self.port))
-        # listen for incoming connections with a maximum of 10 connections (prevent DDOS, etc)
-        server_socket.listen(10)
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create a socket object for the server side using TCP
+        server_socket.bind((self.ip, self.port)) # bind the socket to the ip and port
+        server_socket.listen(20) # listen to the clients (20 clients max)
 
-        # start a thread to broadcast the all clients the informations
-        logger.info(f"{Fore.GREEN}Server started and listening on {
-                    self.ip}:{self.port}")
+        logger.info("Server started and listening for connections")
 
-        threading.Thread(target=self.broadcast, daemon=True).start()
+        threading.Thread(target=self.broadcast, daemon=True).start() # start the thread to broadcast the data to the clients
 
-        # devMonster = Monster(self.next_entity_id, str(uuid.uuid4(
-        # )), "Monster", (200, 200), "assets/custom/vh.png")
-        # devMonster.entity.state['x'] = 200
-        # devMonster.entity.state['y'] = 200
-        # self.monsters[self.next_entity_id] = devMonster
-        # self.next_entity_id += 1
-
-        while True:  # loop to accept incoming connections
-            # accept a new connection and start a new thread to handle it with the handle_client method
-            # 1 client = 1 thread
+        while True: # while the server is running 
             client_socket, client_address = server_socket.accept()
-            logger.info(f"{Fore.BLUE}New connection from {client_address}")
-            threading.Thread(target=self.handle_client, args=(
-                client_socket, client_address)).start()
+            logger.info(f"Accepted connection from {client_address}")
+            threading.Thread(target=self.handle_client, args=(client_socket, client_address)).start()
 
     def handle_client(self, conn, addr):
-        """
-        handle a new client connection by creating a new client object and adding it to the list of clients
-        this method will run in a separate thread for each client
-        """
-        client_id = self.next_entity_id
-        self.next_entity_id += 1
-        client = ClientManager(conn, addr, client_id)
+        client_id = self.next_entity_id # get the id of the client
+        self.next_entity_id += 1 # increment the id of the next entity
+        client = ClientManager(conn, addr, client_id) # create a new client manager for the client
 
-        initial_message = f"ID {client_id} {client.entity.uuid} {
-            client.entity.asset_path} {client.entity.type};"
-        # everyone will receive that new client joined
-        conn.sendall(initial_message.encode())
+        logger.info(f"Client {client_id} connected from {addr}")
+
+        initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
+        conn.sendall(initial_message.encode()) # send the initial message to the client
 
         with self.lock:
             self.clients[client_id] = client
 
-        buffer = ""  # buffer to store incomplete messages
-        while True:  # loop to receive data from the client
+        buffer = ""
+        while True: # while the client is connected
             try:
-                data = conn.recv(1024).decode()  # receive data from the client
-                # if no data is received, break the loop (client disconnected or something went wrong)
+                data = conn.recv(4096).decode() # receive the data from the client
                 if not data:
                     break
-                buffer += data  # add the received data to the buffer
-                while ";" in buffer:  # loop to handle all complete messages in the buffer
-                    # split the buffer into the first complete message and the rest of the buffer
+                buffer += data
+                while ";" in buffer: 
                     message, buffer = buffer.split(";", 1)
-                    # if the message is a position update
                     if message.startswith("POSITION"):
-                        _, x, y, anim_current_action, anim_current_direction = message.split()
-                        with self.lock:  # update the client's position
-                            client.entity.state['x'] = int(x)
-                            client.entity.state['y'] = int(y)
-                            client.entity.anim_current_action = anim_current_action
-                            client.entity.anim_current_direction = anim_current_direction
-
-                            # client.entity.reduce_hp_randomly()
+                        _, x, y, anim_current_action, anim_current_direction = message.split() # separate the data from the message
+                        with self.lock:
+                            client.entity.state['x'] = int(x) # update the x position of the player
+                            client.entity.state['y'] = int(y) # update the y position of the player
+                            client.entity.anim_current_action = anim_current_action # update the current action of the player
+                            client.entity.anim_current_direction = anim_current_direction # update the current direction of the player
+                        logger.debug(f"Updated position for client {client_id}: x={x}, y={y}, action={anim_current_action}, direction={anim_current_direction}")
             except Exception as e:
-                logger.error(f"{Fore.RED}Error handling client {addr}: {e}")
+                logger.error(f"Error handling client {client_id}: {e}")
                 break
 
-        # remove the client from the list of clients
-        self.remove_client(client)
-        conn.close()  # close the connection between the server and the client
+        self.remove_client(client) # remove the client from the list of clients if the client disconnects
+        conn.close() # close the connection with the client
+        logger.info(f"Client {client_id} disconnected")
 
     def broadcast(self):
-        """
-        method to broadcast the positions of all clients to all connected clients at regular intervals
-        """
-        while True:  # loop to broadcast positions
-            entities_data = []  # list to store the positions of all entities
+        while True:
+            entities_data = [] # list of entities data
             clients_data = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path, 'anim_current_action': p.entity.anim_current_action, 'anim_current_direction': p.entity.anim_current_direction}
-                                 # create a list of client positions
-                                 for p in self.clients.values()]
+                            for p in self.clients.values()]
 
-            # Add entities positions to the positions list
             monsters_data = [{'id': e.entity.id, 'uuid': e.entity.uuid, 'state': e.entity.state, 'type': e.entity.type, 'name': e.entity.name, 'hp': e.entity.hp, 'asset_path': e.entity.asset_path, 'anim_current_action': e.entity.anim_current_action, 'anim_current_direction': e.entity.anim_current_direction}
-                                  for e in self.monsters.values()]
+                             for e in self.monsters.values()]
             entities_data.extend(clients_data)
             entities_data.extend(monsters_data)
-            # create a message with the positions
-            message = f"ENTITIES {json.dumps(entities_data)};"
-            for client in self.clients.values():  # send the message to all connected clients
+            
+            message = f"ENTITIES {json.dumps(entities_data)};" # create the message to send to the clients
+            for client in self.clients.values(): # send the message to all the clients
                 try:
-                    # send the message to the client
                     client.conn.sendall(message.encode())
                 except Exception as e:
-                    logger.error(f"{Fore.RED}Error sending to client {
-                                 client.entity.id}: {e}")
+                    logger.error(f"Error broadcasting to client {client.entity.id}: {e}")
                     self.remove_client(client)
-            # wait for the specified interval before broadcasting again (avoid flooding the network)
             time.sleep(self.update_interval)
 
     def remove_client(self, client):
-        """
-        method to remove a client from the list of clients and send a disconnect message to all connected clients
-        """
-        with self.lock:  # remove the client from the list of clients
+        with self.lock:
             if client.entity.id in self.clients:
                 del self.clients[client.entity.id]
-        client.conn.close()  # close the connection between the server and the client
-        logger.info(f"{Fore.BLUE}client {client.entity.id} disconnected")
-        disconnect_message = f"DISCONNECT {
-            client.entity.id};"  # create a disconnect message
-        for p in self.clients.values():  # send the disconnect message to all connected clients
+        client.conn.close()
+        disconnect_message = f"DISCONNECT {client.entity.id};" # send a message to the client to inform him that he is disconnected
+        for p in self.clients.values(): # send the message to all the clients
             try:
-                # send the disconnect message to the client
                 p.conn.sendall(disconnect_message.encode())
             except Exception as e:
-                logger.error(
-                    f"{Fore.RED}Error sending disconnect message to client {p.id}: {e}")
+                logger.error(f"Error sending disconnect message to client {p.entity.id}: {e}")
+        logger.info(f"Client {client.entity.id} removed")

@@ -1,118 +1,34 @@
-import pygame
-import json
-import threading
-from src.client_side.player_client import PlayerClient
+import argparse
+from src.client_side.game_client import GameClient
+from loguru import logger
 
+def main():
+    parser = argparse.ArgumentParser(description='Client Application')
+    parser.add_argument('--debug', action='store_true', help='Activer le mode debug')
+    args = parser.parse_args()
 
-class GameClient:
-    def __init__(self, width, height, config_path, logo_path):
-        self.width = width
-        self.height = height
-        self.config_path = config_path
-        self.logo_path = logo_path
-        self.screen = None
-        self.font = None
-        self.client_logo = None
-        self.clock = None
-        self.client = None
-        self.running = True
+    if args.debug:
+        logger.remove()
+        logger.add(lambda msg: print(msg, end=''), level="DEBUG", colorize=True)
+        logger.debug("DEBUG MODE")
+    else:
+        logger.remove()
+        logger.add(lambda msg: print(msg, end=''), level="INFO", colorize=True)
+        logger.info("PRODUCTION MODE")
 
-    def setup_screen(self):
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("Hungry Client DEV")
-
-    def load_assets(self):
-        self.font = pygame.font.Font(None, 24)
-        self.client_logo = pygame.image.load(self.logo_path)
-        pygame.display.set_icon(self.client_logo)
-        self.client_logo = pygame.transform.scale(self.client_logo, (128, 128))
-
-    def read_config(self):
-        with open(self.config_path, 'r') as f:
-            config = json.load(f)
-        return config.get('ip'), config.get('port')
-
-    def start_client(self, ip, port):
-        self.client = PlayerClient(ip=ip, port=port)
-        threading.Thread(target=self.client.receive_updates,
-                         daemon=True).start()
-
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-
-    def update(self, dt):
-        keys = pygame.key.get_pressed()
-        if self.client.player == None:
-            return
-        self.client.player.anim_current_action = "Idle"
-
-        if keys[pygame.K_z] and keys[pygame.K_q]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_up"
-            self.client.position[1] -= self.client.speed * dt
-            self.client.position[0] -= self.client.speed * dt
-        elif keys[pygame.K_z] and keys[pygame.K_d]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_up"
-            self.client.position[1] -= self.client.speed * dt
-            self.client.position[0] += self.client.speed * dt
-        elif keys[pygame.K_s] and keys[pygame.K_q]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
-            self.client.position[1] += self.client.speed * dt
-            self.client.position[0] -= self.client.speed * dt
-        elif keys[pygame.K_s] and keys[pygame.K_d]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
-            self.client.position[1] += self.client.speed * dt
-            self.client.position[0] += self.client.speed * dt
-
-        elif keys[pygame.K_z]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "up"
-            self.client.position[1] -= self.client.speed * dt
-        elif keys[pygame.K_s]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "down"
-            self.client.position[1] += self.client.speed * dt
-        elif keys[pygame.K_q]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
-            self.client.position[0] -= self.client.speed * dt
-        elif keys[pygame.K_d]:
-            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
-            self.client.position[0] += self.client.speed * dt
-
-        self.client.send_position()
-
-    def draw(self):
-        self.screen.fill((255, 255, 255))
-        n_players = list(self.client.players.values())
-        for player in n_players:
-            if player.id == self.client.player_id:
-                self.client.player = player
-            extra = True
-            if self.client.player is not None:
-                if (abs(player.position[0] - self.client.player.position[0])**2 + abs(player.position[1] - self.client.player.position[1])**2)**0.5 > 500:
-                    extra = False
-            player.draw(self.screen, self.font, (0, 0, 0), extra)
-        pygame.display.flip()
-
-    def run(self):
-        pygame.init()
-        self.setup_screen()
-        self.load_assets()
-        self.clock = pygame.time.Clock()
-        ip, port = self.read_config()
-        self.start_client(ip, port)
-
-        while self.running:
-            dt = self.clock.tick(120) / 1000
-            self.handle_events()
-            self.update(dt)
-            self.draw()
-            # print(self.client.players)
-
-        self.client.close()
-        pygame.quit()
-
+    logger.info("Starting the game client")
+    try:
+        game_client = GameClient(
+            width=1280, # window size
+            height=720, # window size
+            config_path='configs/host.json', # path to the config file configs/host.json
+            logo_path='assets/custom/vh.png') # logo of the game
+        logger.debug("GameClient initialized with width=1280, height=720, config_path='configs/host.json', logo_path='assets/custom/vh.png'")
+        game_client.run() # run the game
+        logger.info("Game client is running")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        logger.debug(f"Exception details: {e}")
 
 if __name__ == "__main__":
-    game_client = GameClient(
-        width=1280, height=720, config_path='configs/host.json', logo_path='assets/custom/vh.png')
-    game_client.run()
+    main()
