@@ -27,7 +27,7 @@ class GameServer:
 
         logger.info("Server started and listening for connections")
 
-        threading.Thread(target=self.broadcast, daemon=True).start() # start the thread to broadcast the data to the clients
+        threading.Thread(target=self.broadcast_entities, daemon=True).start() # start the thread to broadcast the data to the clients
 
         while True: # while the server is running 
             client_socket, client_address = server_socket.accept()
@@ -72,7 +72,7 @@ class GameServer:
         conn.close() # close the connection with the client
         logger.info(f"Client {client_id} disconnected")
 
-    def broadcast(self):
+    def broadcast_entities(self):
         while True:
             entities_data = [] # list of entities data
             clients_data = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path, 'anim_current_action': p.entity.anim_current_action, 'anim_current_direction': p.entity.anim_current_direction}
