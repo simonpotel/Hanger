@@ -21,6 +21,7 @@ class GameClient:
     def setup_screen(self):
         self.screen = pygame.display.set_mode((self.width, self.height)) # create the game window
         pygame.display.set_caption("Hungry Client DEV") # set the game window title
+        pygame.mouse.set_visible(False)  # hide the default mouse cursor
         logger.info("Screen setup with width: {}, height: {}", self.width, self.height)
 
     def load_assets(self):
@@ -115,6 +116,11 @@ class GameClient:
                 draw_position = (player.position[0] - camera_offset_x, player.position[1] - camera_offset_y) # position of the player on the screen (centered)
                 # draw the player in the screen
                 player.draw(self.screen, self.font, (0, 0, 0), extra, draw_position)  # write the player on the screen with the correct position (with offset)
+        if pygame.mouse.get_focused(): # if the mouse is focused on the game window
+            cursor_image = pygame.image.load('assets/Tiny Swords/UI/Pointers/01.png') # load the cursor image
+            cursor_image = pygame.transform.scale(cursor_image, (64, 64))  # scale the cursor image 
+            mouse_x, mouse_y = pygame.mouse.get_pos() # get the position of the mouse on the screen
+            self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2, mouse_y - cursor_image.get_height() // 2)) # draw the cursor on the screen
 
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
