@@ -44,27 +44,53 @@ class GameClient:
 
     def update(self, dt):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_z]:
+        if self.client.player == None:
+            return
+        self.client.player.anim_current_action = "Idle"
+
+        if keys[pygame.K_z] and keys[pygame.K_q]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_up"
             self.client.position[1] -= self.client.speed * dt
-        if keys[pygame.K_s]:
-            self.client.position[1] += self.client.speed * dt
-        if keys[pygame.K_q]:
             self.client.position[0] -= self.client.speed * dt
-        if keys[pygame.K_d]:
+        elif keys[pygame.K_z] and keys[pygame.K_d]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_up"
+            self.client.position[1] -= self.client.speed * dt
             self.client.position[0] += self.client.speed * dt
+        elif keys[pygame.K_s] and keys[pygame.K_q]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
+            self.client.position[1] += self.client.speed * dt
+            self.client.position[0] -= self.client.speed * dt
+        elif keys[pygame.K_s] and keys[pygame.K_d]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
+            self.client.position[1] += self.client.speed * dt
+            self.client.position[0] += self.client.speed * dt
+
+        elif keys[pygame.K_z]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "up"
+            self.client.position[1] -= self.client.speed * dt
+        elif keys[pygame.K_s]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "down"
+            self.client.position[1] += self.client.speed * dt
+        elif keys[pygame.K_q]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
+            self.client.position[0] -= self.client.speed * dt
+        elif keys[pygame.K_d]:
+            self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
+            self.client.position[0] += self.client.speed * dt
+
         self.client.send_position()
 
     def draw(self):
         self.screen.fill((255, 255, 255))
         n_players = list(self.client.players.values())
         for player in n_players:
-            if player.entity.id == self.client.player_id:
+            if player.id == self.client.player_id:
                 self.client.player = player
             extra = True
             if self.client.player is not None:
-                if (abs(player.entity.position[0] - self.client.player.entity.position[0])**2 + abs(player.entity.position[1] - self.client.player.entity.position[1])**2)**0.5 > 500:
+                if (abs(player.position[0] - self.client.player.position[0])**2 + abs(player.position[1] - self.client.player.position[1])**2)**0.5 > 500:
                     extra = False
-            player.entity.draw(self.screen, self.font, (0, 0, 0), extra)
+            player.draw(self.screen, self.font, (0, 0, 0), extra)
         pygame.display.flip()
 
     def run(self):
