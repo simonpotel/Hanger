@@ -24,7 +24,7 @@ class PlayerClient:
         """
         sends the position of the player to the server.
         """
-        message = f"POSITION {int(self.position[0])} {int(self.position[1])};"
+        message = f"POSITION {int(self.position[0])} {int(self.position[1])} {self.player.anim_current_action} {self.player.anim_current_direction};"
         self.conn.sendall(message.encode())
 
     def receive_updates(self):
@@ -46,9 +46,6 @@ class PlayerClient:
     def handle_data(self, data):
         """
         manages the data received from the server. 
-        ID <player_id> <player_uuid> : assigns the player id and uuid to the player client (only once)
-        POSITIONS <positions> : updates the positions of the players in the game (except the player client)
-        DISCONNECT <player_id> : removes a player from the game (when a player disconnects)
         """
         messages = data.split(";")
         for message in messages:
@@ -66,17 +63,17 @@ class PlayerClient:
                     render=True
                 )
                 self.players[self.player_id] = self.player
-            elif message.startswith("POSITIONS"):
-                _, positions = message.split(" ", 1)
+            elif message.startswith("ENTITIES"):
+                _, entities_data = message.split(" ", 1)
                 try:
-                    positions = json.loads(positions)
-                    for p in positions:
+                    entities_data = json.loads(entities_data)
+                    for p in entities_data:
                         if p['id'] != self.player_id:
                             if p['id'] in self.players:
                                 player = self.players[p['id']]
                                 if 'x' in p['state'] and 'y' in p['state']:
                                     player.update_position(
-                                        (p['state']['x'], p['state']['y']))
+                                        (p['state']['x'], p['state']['y']), p['anim_current_action'], p['anim_current_direction'])
                             else:
                                 self.players[p['id']] = Entity(
                                     id=p['id'],

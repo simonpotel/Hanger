@@ -14,12 +14,13 @@ class Entity():
         self.hp = 100  # 100 %
         self.state = {'x': 0, 'y': 0}
         self.asset_path = asset_path
+        self.anim_current_direction = "down"
+        self.anim_current_action = "Idle"
+        self.anim_animations = {}
 
         if render == True:
             match asset_path:
                 case "player_skin_1":  # player
-                    self.anim_current_action = "Idle"
-                    self.anim_current_direction = "down"
                     self.anim_animations = {
                         "Idle": {
                             "down": Animation("assets/character/Idle/idle_down.png", 48, 64),
@@ -39,11 +40,13 @@ class Entity():
                         }
                     }
 
-    def update_position(self, new_position):
+    def update_position(self, new_position, anim_current_action, anim_current_direction):
         """
         updates the position of the entity.
         """
         self.position = new_position
+        self.anim_current_action = anim_current_action
+        self.anim_current_direction = anim_current_direction
 
     def draw(self, screen, font, color, extra):
         """

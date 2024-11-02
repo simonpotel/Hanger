@@ -95,10 +95,12 @@ class GameServer:
                     message, buffer = buffer.split(";", 1)
                     # if the message is a position update
                     if message.startswith("POSITION"):
-                        _, x, y = message.split()
+                        _, x, y, anim_current_action, anim_current_direction = message.split()
                         with self.lock:  # update the client's position
                             client.entity.state['x'] = int(x)
                             client.entity.state['y'] = int(y)
+                            client.entity.anim_current_action = anim_current_action
+                            client.entity.anim_current_direction = anim_current_direction
 
                             # client.entity.reduce_hp_randomly()
             except Exception as e:
@@ -114,18 +116,18 @@ class GameServer:
         method to broadcast the positions of all clients to all connected clients at regular intervals
         """
         while True:  # loop to broadcast positions
-            positions = []  # list to store the positions of all entities
-            clients_positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
+            entities_data = []  # list to store the positions of all entities
+            clients_data = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path, 'anim_current_action': p.entity.anim_current_action, 'anim_current_direction': p.entity.anim_current_direction}
                                  # create a list of client positions
                                  for p in self.clients.values()]
 
             # Add entities positions to the positions list
-            monsters_positions = [{'id': e.entity.id, 'uuid': e.entity.uuid, 'state': e.entity.state, 'type': e.entity.type, 'name': e.entity.name, 'hp': e.entity.hp, 'asset_path': e.entity.asset_path}
+            monsters_data = [{'id': e.entity.id, 'uuid': e.entity.uuid, 'state': e.entity.state, 'type': e.entity.type, 'name': e.entity.name, 'hp': e.entity.hp, 'asset_path': e.entity.asset_path, 'anim_current_action': e.entity.anim_current_action, 'anim_current_direction': e.entity.anim_current_direction}
                                   for e in self.monsters.values()]
-            positions.extend(clients_positions)
-            positions.extend(monsters_positions)
+            entities_data.extend(clients_data)
+            entities_data.extend(monsters_data)
             # create a message with the positions
-            message = f"POSITIONS {json.dumps(positions)};"
+            message = f"ENTITIES {json.dumps(entities_data)};"
             for client in self.clients.values():  # send the message to all connected clients
                 try:
                     # send the message to the client
