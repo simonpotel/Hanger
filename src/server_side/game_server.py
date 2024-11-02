@@ -6,7 +6,7 @@ import time
 from loguru import logger
 from colorama import init, Fore
 from src.server_side.client_manager import ClientManager
-from src.entities.monster import Monster
+from src.entities.entity import Entity
 
 init(autoreset=True)
 
@@ -50,12 +50,12 @@ class GameServer:
 
         threading.Thread(target=self.broadcast, daemon=True).start()
 
-        devMonster = Monster(self.next_entity_id, str(uuid.uuid4(
-        )), "Monster", (200, 200), "assets/custom/vh.png")
-        devMonster.entity.state['x'] = 200
-        devMonster.entity.state['y'] = 200
-        self.monsters[self.next_entity_id] = devMonster
-        self.next_entity_id += 1
+        # devMonster = Monster(self.next_entity_id, str(uuid.uuid4(
+        # )), "Monster", (200, 200), "assets/custom/vh.png")
+        # devMonster.entity.state['x'] = 200
+        # devMonster.entity.state['y'] = 200
+        # self.monsters[self.next_entity_id] = devMonster
+        # self.next_entity_id += 1
 
         while True:  # loop to accept incoming connections
             # accept a new connection and start a new thread to handle it with the handle_client method
@@ -116,12 +116,12 @@ class GameServer:
         while True:  # loop to broadcast positions
             positions = []  # list to store the positions of all entities
             clients_positions = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path}
-                     # create a list of client positions
-                     for p in self.clients.values()]
-        
+                                 # create a list of client positions
+                                 for p in self.clients.values()]
+
             # Add entities positions to the positions list
             monsters_positions = [{'id': e.entity.id, 'uuid': e.entity.uuid, 'state': e.entity.state, 'type': e.entity.type, 'name': e.entity.name, 'hp': e.entity.hp, 'asset_path': e.entity.asset_path}
-                                for e in self.monsters.values()]
+                                  for e in self.monsters.values()]
             positions.extend(clients_positions)
             positions.extend(monsters_positions)
             # create a message with the positions

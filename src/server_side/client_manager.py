@@ -9,5 +9,10 @@ class ClientManager:
         """
         self.conn = conn  # connection object to communicate with the client
         self.addr = addr  # address of the client
-        self.entity = Entity(id=client_id, uuid=str(uuid.uuid4(
-        )), name="Joueur", position=(0, 0), asset_path="assets/custom/dev.png", type=1)
+        self.entity = Entity(
+            id=client_id,
+            name=f"Player {client_id}",
+            uuid=str(uuid.uuid4()),
+            position=[400, 300],
+            asset_path="player_skin_1",
+            type=1, render=False)
