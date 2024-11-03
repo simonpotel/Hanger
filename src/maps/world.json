@@ -1,37 +1,51 @@
 {
-    "tree1": {
-        "asset_path": "assets/Tiny Swords/Deco/01.png",
-        "x": 0,
-        "y": 0,
-        "width": 192,
-        "height": 192
-    },
-    "champi3": {
+    "champi1": {
         "asset_path": "assets/Tiny Swords/Deco/03.png",
-        "x": 300,
+        "x": 0,
         "y": 0,
         "width": 64,
         "height": 64
     },
     "champi2": {
         "asset_path": "assets/Tiny Swords/Deco/02.png",
-        "x": 250,
+        "x": 30,
         "y": 0,
         "width": 64,
         "height": 64
     },
-    "champi1": {
-        "asset_path": "assets/Tiny Swords/Deco/01.png",
-        "x": 320,
+    "champi3": {
+        "asset_path": "assets/Tiny Swords/Deco/02.png",
+        "x": -30,
         "y": 0,
         "width": 64,
         "height": 64
     },
-    "champi5": {
-        "asset_path": "assets/Tiny Swords/Deco/01.png",
-        "x": 320,
-        "y": 50,
+    "epouvantaille": {
+        "asset_path": "assets/Tiny Swords/Deco/18.png",
+        "x": 0,
+        "y": 100,
+        "width": 192,
+        "height": 192
+    },
+    "citrouille": {
+        "asset_path": "assets/Tiny Swords/Deco/13.png",
+        "x": 0,
+        "y": 150,
         "width": 64,
         "height": 64
+    },
+    "maison_gobelin":{
+        "asset_path": "assets/Tiny Swords/Factions/Goblins/Buildings/Wood_House/Goblin_House.png",
+        "x": 0,
+        "y": 250,
+        "width": 128,
+        "height": 192
+    },
+    "foret_arbre1": {
+        "asset_path": "assets/Tiny Swords/Resources/Trees/Tree.png",
+        "x": -100,
+        "y": 250,
+        "width": 192,
+        "height": 192
     }
 }
