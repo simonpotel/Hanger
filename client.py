@@ -26,8 +26,8 @@ def main():
             width=window_game_size[0], # window size
             height=window_game_size[1], # window size
             config_path='configs/host.json', # path to the config file configs/host.json
-            logo_path='assets/custom/vh.png') # logo of the game
-        logger.debug(f"GameClient initialized with width={window_game_size[0]}, height={window_game_size[1]}, config_path='configs/host.json', logo_path='assets/custom/vh.png'")
+            logo_path='assets/beef.png') # logo of the game
+        logger.debug(f"GameClient initialized with width={window_game_size[0]}, height={window_game_size[1]}")
         game_client.run(debug=args.debug) # run the game
         logger.info("Game client is running")
     except Exception as e:
