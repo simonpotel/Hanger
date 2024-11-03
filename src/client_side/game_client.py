@@ -106,31 +106,28 @@ class GameClient:
         logger.debug("Player position updated to: {}", self.client.position)
 
     def draw(self):
-        # draw the entites of the game (using the tabs updated by handlers with server)
+        # draw the entities of the game (using the tabs updated by handlers with server)
         # fill the screen with white color (reset the screen)
         if self.client.player is None:
             return
         self.screen.fill((255, 255, 255))
         n_players = list(self.client.players.values())
 
-        # manage the camera offset to follow the player (ur own) in center of the game window
+        # manage the camera offset to follow the player (your own) in center of the game window
         # camera offset x center
         camera_offset_x = self.client.player.position[0] - self.width // 2
         # camera offset y center
         camera_offset_y = self.client.player.position[1] - self.height // 2
 
-        if 'world' in self.client.maps.maps:
-            for asset, properties in self.client.maps.maps['world'].items():
-                asset_image = pygame.image.load(properties['asset_path'])
-                asset_image = pygame.transform.scale(
-                    asset_image, (properties['width'], properties['height']))
-                self.screen.blit(
-                    asset_image,
-                    (properties['x'] - camera_offset_x - properties['width'] // 2,
-                    properties['y'] - camera_offset_y - properties['height'] // 2)
-                )
-        
-        for player in n_players:  # do this for every players in the game
+        for map_name, assets in self.client.maps.maps_animations.items():
+            for asset_name, animation in assets.items():
+                animation.update()  # update the animation
+                frame = animation.get_current_frame()  # get the current frame of the animation
+                asset_properties = self.client.maps.maps[map_name][asset_name]
+                position = (asset_properties['x'] - camera_offset_x, asset_properties['y'] - camera_offset_y)
+                self.screen.blit(frame, position)  # draw the animation at the specified position
+
+        for player in n_players:  # do this for every player in the game
             if player.id == self.client.player_id:
                 # update the player in the client side if needed in other part of the code
                 self.client.player = player
@@ -141,7 +138,7 @@ class GameClient:
             # position of the player on the screen (centered)
             draw_position = (
                 player.position[0] - camera_offset_x, player.position[1] - camera_offset_y)
-            # draw the player in the screen
+            # draw the player on the screen
             # write the player on the screen with the correct position (with offset)
             player.draw(self.screen, self.font,
                         (0, 0, 0), extra, draw_position)
