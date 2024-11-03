@@ -1,0 +1,15 @@
+{
+    "deco1": {
+        "asset_path": "assets/Tiny Swords/Deco/04.png",
+        "x": 200,
+        "y": 250,
+        "width": 64,
+        "height": 64
+    },"champi1": {
+        "asset_path": "assets/Tiny Swords/Deco/01.png",
+        "x": 100,
+        "y": 0,
+        "width": 64,
+        "height": 64
+    }
+}
