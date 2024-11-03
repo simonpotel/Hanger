@@ -101,7 +101,7 @@ class GameServer:
         while True:
             if maps_update_required(self.maps):
                 maps_load_config(self.maps)
-                message = f"MAPS {self.maps};"
+                message = f"MAPS {json.dumps(self.maps.maps)};"
                 for client in self.clients.values():
                     try:
                         client.conn.sendall(message.encode())
