@@ -17,6 +17,7 @@ class GameClient:
         self.clock = None  # pygame clock obj
         self.client = None  # PlayerClient obj
         self.running = True
+        self.debug = False
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
                     width, height, config_path, logo_path)
 
@@ -24,7 +25,8 @@ class GameClient:
         self.screen = pygame.display.set_mode(
             (self.width, self.height))  # create the game window
         # set the game window title
-        pygame.display.set_caption("Hanger Client")
+        caption = "Hanger Client (Debug)" if self.debug else "Hanger Client"
+        pygame.display.set_caption(caption)
         pygame.mouse.set_visible(False)  # hide the default mouse cursor
         logger.info("Screen setup with width: {}, height: {}",
                     self.width, self.height)
@@ -156,8 +158,9 @@ class GameClient:
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
 
-    def run(self):
+    def run(self, debug=False):
         # run the game
+        self.debug = debug
         pygame.init()
         logger.info("Pygame initialized")
         self.setup_screen()

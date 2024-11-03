@@ -32,12 +32,9 @@ class Animation:
 
     def update(self):
         self.animation_timer += self.animation_speed
-        logger.debug("Animation timer updated: {}", self.animation_timer)
         if self.animation_timer >= 1:
             self.animation_timer = 0
             self.current_frame = (self.current_frame + 1) % len(self.frames)
-            logger.debug("Current frame updated to {}", self.current_frame)
 
     def get_current_frame(self):
-        logger.debug("Returning current frame: {}", self.current_frame)
         return self.frames[self.current_frame]

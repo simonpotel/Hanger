@@ -13,7 +13,7 @@ def main():
         logger.remove()
         logger.add(lambda msg: print(msg, end=''), level="DEBUG", colorize=True)
         logger.debug("DEBUG MODE")
-        window_game_size = (500, 500)
+        window_game_size = (window_game_size[0] // 2, window_game_size[1] // 2)
     else:
         logger.remove()
         logger.add(lambda msg: print(msg, end=''), level="INFO", colorize=True)
@@ -27,12 +27,12 @@ def main():
             height=window_game_size[1], # window size
             config_path='configs/host.json', # path to the config file configs/host.json
             logo_path='assets/custom/vh.png') # logo of the game
-        logger.debug("GameClient initialized with width=1280, height=720, config_path='configs/host.json', logo_path='assets/custom/vh.png'")
-        game_client.run() # run the game
+        logger.debug(f"GameClient initialized with width={window_game_size[0]}, height={window_game_size[1]}, config_path='configs/host.json', logo_path='assets/custom/vh.png'")
+        game_client.run(debug=args.debug) # run the game
         logger.info("Game client is running")
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        logger.debug(f"Exception details: {e}")
+        logger.debug(f"Exception (game client) details: {e}")
 
 if __name__ == "__main__":
     main()

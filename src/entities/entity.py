@@ -43,14 +43,12 @@ class Entity():
                             logger.info("Loaded animations for player_skin_1")
 
     def update_position(self, new_position, anim_current_action, anim_current_direction):
-        logger.debug(f"Updating position to {new_position}, action to {anim_current_action}, direction to {anim_current_direction}")
         self.position = new_position
         self.anim_current_action = anim_current_action
         self.anim_current_direction = anim_current_direction
 
 
     def draw(self, screen, font, color, extra, draw_position):
-        logger.debug(f"Drawing entity {self.id} at position {draw_position}")
         current_animation = self.anim_animations[self.anim_current_action][self.anim_current_direction]
         current_animation.update()
 
@@ -59,7 +57,6 @@ class Entity():
                      draw_position[1] - current_animation.frame_height * current_animation.scale_factor // 2))
 
         if extra:
-            logger.debug(f"Drawing extra info for entity {self.id}")
             id_text = font.render(f'ID: {self.id}', True, color)
             id_rect = id_text.get_rect(center=(draw_position[0]-20, draw_position[1] + 50))
             screen.blit(id_text, id_rect)

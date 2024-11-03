@@ -20,7 +20,6 @@ class PlayerClient:
     def send_position(self):
         message = f"POSITION {int(self.position[0])} {int(self.position[1])} {self.player.anim_current_action} {self.player.anim_current_direction};"
         self.conn.sendall(message.encode()) # send the message to the server
-        logger.debug(f"Sent position: {message}")
 
     def receive_updates(self):
         # receive the updates from the server
@@ -82,7 +81,6 @@ class PlayerClient:
                         self.players[p['id']].name = p['name']
                         self.players[p['id']].type = p['type']
                         self.players[p['id']].uuid = p['uuid']
-                    logger.debug(f"Updated entities: {entities_data}")
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON decode error: {e}")
             elif message.startswith("MAPS"):
