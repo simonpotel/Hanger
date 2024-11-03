@@ -7,20 +7,24 @@ def main():
     parser.add_argument('--debug', action='store_true', help='Activer le mode debug')
     args = parser.parse_args()
 
+    window_game_size = (1280, 720)
+
     if args.debug:
         logger.remove()
         logger.add(lambda msg: print(msg, end=''), level="DEBUG", colorize=True)
         logger.debug("DEBUG MODE")
+        window_game_size = (500, 500)
     else:
         logger.remove()
         logger.add(lambda msg: print(msg, end=''), level="INFO", colorize=True)
         logger.info("PRODUCTION MODE")
 
+
     logger.info("Starting the game client")
     try:
         game_client = GameClient(
-            width=1280, # window size
-            height=720, # window size
+            width=window_game_size[0], # window size
+            height=window_game_size[1], # window size
             config_path='configs/host.json', # path to the config file configs/host.json
             logo_path='assets/custom/vh.png') # logo of the game
         logger.debug("GameClient initialized with width=1280, height=720, config_path='configs/host.json', logo_path='assets/custom/vh.png'")

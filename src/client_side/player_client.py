@@ -2,6 +2,7 @@ import socket
 import json
 from src.entities.entity import Entity
 from loguru import logger 
+from src.maps import Maps
 
 class PlayerClient:
     def __init__(self, ip='127.0.0.1', port=65432):
@@ -11,6 +12,7 @@ class PlayerClient:
         self.player_id = None # id of the player
         self.player_uuid = None # uuid of the player
         self.players = {} # list of players
+        self.maps = Maps() # maps object
         self.player = None # player class object
         self.speed = 200 # speed of the player (200 pixels per second)
         logger.info(f"Connected to server at {ip}:{port}")
@@ -83,6 +85,14 @@ class PlayerClient:
                     logger.debug(f"Updated entities: {entities_data}")
                 except json.JSONDecodeError as e:
                     logger.error(f"JSON decode error: {e}")
+            elif message.startswith("MAPS"):
+                _, maps_data = message.split(" ", 1)
+                try:
+                    self.maps.update_maps(json.loads(maps_data))
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON decode error: {e}")
+                except ValueError as e:
+                    logger.error(f"Value error: {e}")
             elif message.startswith("DISCONNECT"):
                 _, player_id = message.split()
                 if int(player_id) in self.players:

@@ -3,6 +3,7 @@ import threading
 import json
 import time
 from src.server_side.client_manager import ClientManager
+from src.maps import Maps, maps_load_config, maps_update_required
 from loguru import logger
 
 class GameServer:
@@ -10,6 +11,8 @@ class GameServer:
         self.update_interval = update_interval # updates intervals between the server and the clients
         self.monsters = {} # list of monsters
         self.clients = {} # list of clients 
+        self.maps = Maps()
+        maps_load_config(self.maps)
         self.lock = threading.Lock() # lock to avoid multiple threads to access the same data
         self.next_entity_id = 1 # id of the next entity
 
@@ -27,7 +30,8 @@ class GameServer:
 
         logger.info("Server started and listening for connections")
 
-        threading.Thread(target=self.broadcast, daemon=True).start() # start the thread to broadcast the data to the clients
+        threading.Thread(target=self.broadcast_entities, daemon=True).start() # start the thread to broadcast the data to the clients
+        threading.Thread(target=self.broadcast_maps, daemon=True).start() # start the thread to broadcast the data to the clients
 
         while True: # while the server is running 
             client_socket, client_address = server_socket.accept()
@@ -42,6 +46,7 @@ class GameServer:
         logger.info(f"Client {client_id} connected from {addr}")
 
         initial_message = f"ID {client_id} {client.entity.uuid} {client.entity.asset_path} {client.entity.type};"
+        initial_message = initial_message + f"MAPS {json.dumps(self.maps.maps)};"
         conn.sendall(initial_message.encode()) # send the initial message to the client
 
         with self.lock:
@@ -72,7 +77,7 @@ class GameServer:
         conn.close() # close the connection with the client
         logger.info(f"Client {client_id} disconnected")
 
-    def broadcast(self):
+    def broadcast_entities(self):
         while True:
             entities_data = [] # list of entities data
             clients_data = [{'id': p.entity.id, 'uuid': p.entity.uuid, 'state': p.entity.state, 'type': p.entity.type, 'name': p.entity.name, 'hp': p.entity.hp, 'asset_path': p.entity.asset_path, 'anim_current_action': p.entity.anim_current_action, 'anim_current_direction': p.entity.anim_current_direction}
@@ -91,6 +96,18 @@ class GameServer:
                     logger.error(f"Error broadcasting to client {client.entity.id}: {e}")
                     self.remove_client(client)
             time.sleep(self.update_interval)
+
+    def broadcast_maps(self):
+        while True:
+            if maps_update_required(self.maps):
+                maps_load_config(self.maps)
+                message = f"MAPS {json.dumps(self.maps.maps)};"
+                for client in self.clients.values():
+                    try:
+                        client.conn.sendall(message.encode())
+                    except Exception as e:
+                        logger.error(f"Error broadcasting maps to client {client.entity.id}: {e}")
+                        self.remove_client(client)
 
     def remove_client(self, client):
         with self.lock:

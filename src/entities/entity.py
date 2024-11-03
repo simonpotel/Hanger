@@ -1,5 +1,5 @@
 import pygame
-from src.client_side.animation import Animation
+from src.client_side.render.animation import Animation
 from loguru import logger
 
 class Entity():
