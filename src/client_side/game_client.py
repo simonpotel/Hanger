@@ -122,6 +122,17 @@ class GameClient:
             mouse_x, mouse_y = pygame.mouse.get_pos() # get the position of the mouse on the screen
             self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2, mouse_y - cursor_image.get_height() // 2)) # draw the cursor on the screen
 
+        if 'world' in self.client.maps.maps:
+            for asset_path, properties in self.client.maps.maps['world'].items():
+                if asset_path in self.client.maps.maps_animations['world']:
+                    current_animation = self.client.maps.maps_animations['world'][asset_path]
+                    current_animation.update()
+                    self.screen.blit(
+                        current_animation.get_current_frame(),
+                        (properties['x'] - camera_offset_x - current_animation.frame_width * current_animation.scale_factor // 2,
+                         properties['y'] - camera_offset_y - current_animation.frame_height * current_animation.scale_factor // 2)
+                    )
+
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
     
