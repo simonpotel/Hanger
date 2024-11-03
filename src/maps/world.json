@@ -1,25 +1,36 @@
 {
-    "assets/Tiny Swords/Resources/Trees/Tree.png": {
+    "tree1": {
+        "asset_path": "assets/Tiny Swords/Deco/01.png",
         "x": 0,
         "y": 0,
         "width": 192,
         "height": 192
     },
-    "assets/Tiny Swords/Deco/03.png": {
+    "champi3": {
+        "asset_path": "assets/Tiny Swords/Deco/03.png",
         "x": 300,
         "y": 0,
         "width": 64,
         "height": 64
     },
-    "assets/Tiny Swords/Deco/02.png": {
+    "champi2": {
+        "asset_path": "assets/Tiny Swords/Deco/02.png",
         "x": 250,
         "y": 0,
         "width": 64,
         "height": 64
     },
-    "assets/Tiny Swords/Deco/01.png": {
+    "champi1": {
+        "asset_path": "assets/Tiny Swords/Deco/01.png",
         "x": 320,
         "y": 0,
+        "width": 64,
+        "height": 64
+    },
+    "champi5": {
+        "asset_path": "assets/Tiny Swords/Deco/01.png",
+        "x": 320,
+        "y": 50,
         "width": 64,
         "height": 64
     }

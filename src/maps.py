@@ -17,7 +17,7 @@ class Maps():
                 
             for asset, properties in assets.items():
                 if asset not in self.maps_animations[map_name]:
-                    self.maps_animations[map_name][asset] = Animation(asset_path=asset, frame_width=properties['width'], frame_height=properties['height'], scale_factor=1)
+                    self.maps_animations[map_name][asset] = Animation(asset_path=properties['asset_path'], frame_width=properties['width'], frame_height=properties['height'], scale_factor=1)
                 else:
                     self.maps_animations[map_name][asset].frame_width = properties['width']
                     self.maps_animations[map_name][asset].frame_height = properties['height']
