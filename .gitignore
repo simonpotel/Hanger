@@ -4,3 +4,4 @@ build/
 *.log
 logs/
 .DS_Store
+tools/validate_map_json/*.json
