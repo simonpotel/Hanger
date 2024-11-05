@@ -171,7 +171,8 @@ class GameClient:
 
         while self.running:
             # get the delta time between each frame (to have a smooth game)
-            dt = self.clock.tick(120) / 1000
+            cloak = self.clock.tick(120)
+            dt = cloak/1000
             self.handle_events()  # handle the events of the game
             self.update(dt)  # update the game
             self.draw()  # draw the game
