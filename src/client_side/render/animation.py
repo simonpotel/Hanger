@@ -9,7 +9,7 @@ class Animation:
         self.scale_factor = scale_factor
         self.frames = []
         self.current_frame = 0
-        self.animation_speed = 0.025
+        self.animation_speed = 0.065
         self.animation_timer = 0
 
         try:
