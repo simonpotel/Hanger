@@ -16,6 +16,8 @@ class PlayerClient:
         self.player = None # player class object
         self.speed = 200 # speed of the player (200 pixels per second)
         logger.info(f"Connected to server at {ip}:{port}")
+        self.attack_range = 50 # attack range of the player
+        self.attack_damage = 10 # attack damage of the player
 
     def send_position(self):
         message = f"POSITION {int(self.position[0])} {int(self.position[1])} {self.player.anim_current_action} {self.player.anim_current_direction};"
