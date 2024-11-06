@@ -113,18 +113,39 @@ class GameClient:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[0] += self.client.speed * dt
         else:
+
             if abs(dx) > abs(dy):
                 if dx > 0:
-                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","right_down"
+                    if dy > 50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "right_down"
+                    elif dy < -50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "right_up"
+                    else:
+                        self.client.player.anim_current_action = "Idle"
                 elif dx < 0:
-                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","left_down"
+                    if dy > 50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "left_down"
+                    elif dy < -50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "left_up"
+                    else:
+                        self.client.player.anim_current_action = "Idle"
                 else:
                     self.client.player.anim_current_action = "Idle"
             else:
                 if dy > 0:
-                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","down"
+                    if dx > 50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "right_down"
+                    elif dx < -50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "left_down"
+                    else:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "down"
                 elif dy < 0:
-                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","up"
+                    if dx > 50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "right_up"
+                    elif dx < -50:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "left_up"
+                    else:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle", "up"
                 else:
                     self.client.player.anim_current_action = "Idle"
 
