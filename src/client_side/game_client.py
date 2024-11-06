@@ -126,8 +126,10 @@ class GameClient:
                 animation.update()  # update the animation
                 frame = animation.get_current_frame()  # get the current frame of the animation
                 asset_properties = self.client.maps.maps[map_name][asset_name]
-                position = (asset_properties['x'] - camera_offset_x, asset_properties['y'] - camera_offset_y)
-                self.screen.blit(frame, position)  # draw the animation at the specified position
+                position = (
+                    asset_properties['x'] - camera_offset_x, asset_properties['y'] - camera_offset_y)
+                # draw the animation at the specified position
+                self.screen.blit(frame, position)
 
         for player in n_players:  # do this for every player in the game
             if player.id == self.client.player_id:

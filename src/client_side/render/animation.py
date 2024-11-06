@@ -1,9 +1,11 @@
 import pygame
 from loguru import logger
 
+
 class Animation:
     def __init__(self, asset_path, frame_width, frame_height, scale_factor=3):
-        logger.info("Initializing Animation with asset_path: {}, frame_width: {}, frame_height: {}, scale_factor: {}", asset_path, frame_width, frame_height, scale_factor)
+        logger.info("Initializing Animation with asset_path: {}, frame_width: {}, frame_height: {}, scale_factor: {}",
+                    asset_path, frame_width, frame_height, scale_factor)
         self.frame_width = frame_width
         self.frame_height = frame_height
         self.scale_factor = scale_factor
@@ -16,7 +18,8 @@ class Animation:
             self.sprite_sheet = pygame.image.load(asset_path).convert_alpha()
             logger.info("Sprite sheet loaded successfully from {}", asset_path)
         except pygame.error as e:
-            logger.error("Failed to load sprite sheet from {}: {}", asset_path, e)
+            logger.error(
+                "Failed to load sprite sheet from {}: {}", asset_path, e)
             raise
 
         self.num_frames = self.sprite_sheet.get_width() // self.frame_width
