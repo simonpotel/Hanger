@@ -134,8 +134,7 @@ class GameClient:
                                 logger.info("Player {} attacked Player {}. New health: {}", self.client.player.id, player.id, player.entity.hp)
                             else:
                                 logger.warning("Player {} does not have a valid entity or hp attribute", player.id)
-                            logger.info("Player {} attacked Player {}. New health: {}", self.client.player.id, player.id, player.entity.hp)
-                
+                self.client.broadcast_entities()
                 self.attack_frame += 1
         else:
             keys = pygame.key.get_pressed()
