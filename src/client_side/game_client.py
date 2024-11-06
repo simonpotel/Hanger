@@ -67,6 +67,8 @@ class GameClient:
                 self.running = False
                 logger.info("Quit event detected, stopping the game")
 
+        
+
     def update(self, dt):
         # manage the deplacement of your player (in client) and transmit to server
         # the new position of your player and the action / direction for animations
@@ -74,6 +76,13 @@ class GameClient:
         if self.client.player is None:
             return
         self.client.player.anim_current_action = "Idle"
+
+        cursor_x, cursor_y = pygame.mouse.get_pos()
+        player_x, player_y = self.client.player.position
+
+        dx = cursor_x - player_x
+        dy = cursor_y - player_y
+
 
         if keys[pygame.K_z] and keys[pygame.K_q]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_up"
@@ -103,6 +112,24 @@ class GameClient:
         elif keys[pygame.K_d]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[0] += self.client.speed * dt
+        else:
+            if abs(dx) > abs(dy):
+                if dx > 0:
+                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","right_down"
+                elif dx < 0:
+                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","left_down"
+                else:
+                    self.client.player.anim_current_action = "Idle"
+            else:
+                if dy > 0:
+                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","down"
+                elif dy < 0:
+                    self.client.player.anim_current_action, self.client.player.anim_current_direction = "Idle","up"
+                else:
+                    self.client.player.anim_current_action = "Idle"
+
+
+            
 
         self.client.send_position()
         logger.debug("Player position updated to: {}", self.client.position)

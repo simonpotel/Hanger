@@ -16,6 +16,8 @@ class Entity():
         self.anim_current_direction = "down"
         self.anim_current_action = "Idle"
         self.anim_animations = {}
+        self.asset_width = 48
+        self.asset_height = 64
 
         if render:
             match type:
@@ -24,20 +26,20 @@ class Entity():
                         case "player_skin_1":
                             self.anim_animations = {
                                 "Idle": {
-                                    "down": Animation("assets/character/Idle/idle_down.png", 48, 64),
-                                    "left_down": Animation("assets/character/Idle/idle_left_down.png", 48, 64),
-                                    "left_up": Animation("assets/character/Idle/idle_left_up.png", 48, 64),
-                                    "right_down": Animation("assets/character/Idle/idle_right_down.png", 48, 64),
-                                    "right_up": Animation("assets/character/Idle/idle_right_up.png", 48, 64),
-                                    "up": Animation("assets/character/Idle/idle_up.png", 48, 64),
+                                    "down": Animation("assets/character/Idle/idle_down.png", self.asset_width, self.asset_height),
+                                    "left_down": Animation("assets/character/Idle/idle_left_down.png", self.asset_width, self.asset_height),
+                                    "left_up": Animation("assets/character/Idle/idle_left_up.png", self.asset_width, self.asset_height),
+                                    "right_down": Animation("assets/character/Idle/idle_right_down.png", self.asset_width, self.asset_height),
+                                    "right_up": Animation("assets/character/Idle/idle_right_up.png", self.asset_width, self.asset_height),
+                                    "up": Animation("assets/character/Idle/idle_up.png", self.asset_width, self.asset_height),
                                 },
                                 "Walk": {
-                                    "down": Animation("assets/character/Walk/walk_down.png", 48, 64),
-                                    "left_down": Animation("assets/character/Walk/walk_left_down.png", 48, 64),
-                                    "left_up": Animation("assets/character/Walk/walk_left_up.png", 48, 64),
-                                    "right_down": Animation("assets/character/Walk/walk_right_down.png", 48, 64),
-                                    "right_up": Animation("assets/character/Walk/walk_right_up.png", 48, 64),
-                                    "up": Animation("assets/character/Walk/walk_up.png", 48, 64),
+                                    "down": Animation("assets/character/Walk/walk_down.png", self.asset_width, self.asset_height),
+                                    "left_down": Animation("assets/character/Walk/walk_left_down.png", self.asset_width, self.asset_height),
+                                    "left_up": Animation("assets/character/Walk/walk_left_up.png", self.asset_width, self.asset_height),
+                                    "right_down": Animation("assets/character/Walk/walk_right_down.png", self.asset_width, self.asset_height),
+                                    "right_up": Animation("assets/character/Walk/walk_right_up.png", self.asset_width, self.asset_height),
+                                    "up": Animation("assets/character/Walk/walk_up.png", self.asset_width, self.asset_height),
                                 }
                             }
                             logger.info("Loaded animations for player_skin_1")
