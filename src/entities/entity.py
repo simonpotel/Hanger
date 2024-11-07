@@ -27,20 +27,20 @@ class Entity():
                         case "player_skin_1":
                             self.anim_animations = {
                                 "Idle": {
-                                    "down": Animation("assets/character/Idle/idle_down.png", 48, 64),
-                                    "left_down": Animation("assets/character/Idle/idle_left_down.png", 48, 64),
-                                    "left_up": Animation("assets/character/Idle/idle_left_up.png", 48, 64),
-                                    "right_down": Animation("assets/character/Idle/idle_right_down.png", 48, 64),
-                                    "right_up": Animation("assets/character/Idle/idle_right_up.png", 48, 64),
-                                    "up": Animation("assets/character/Idle/idle_up.png", 48, 64),
+                                    "down": Animation("assets/Custom/perso/face/immobile/persofaceimmobile-Sheet.png", 64, 64, 4),
+                                    "left_down": Animation("assets/Custom/perso/gauche/immobile/persogaucheimmobile-Sheet.png", 64, 64, 4),
+                                    "left_up": Animation("assets/Custom/perso/derrièregauche/immobile/persoderrièreaucheimmobile-Sheet.png", 64, 64, 4),
+                                    "right_down": Animation("assets/Custom/perso/droite/immobile/persodroite-Sheet.png", 64, 64, 4),
+                                    "right_up": Animation("assets/Custom/perso/derrièredroite/immobile/persoderrièredroiteimmobile-Sheet.png", 64, 64, 4),
+                                    "up": Animation("assets/Custom/perso/derrière/immobile/persoderrière-Sheet.png", 64, 64, 4),
                                 },
                                 "Walk": {
-                                    "down": Animation("assets/character/Walk/walk_down.png", 48, 64),
-                                    "left_down": Animation("assets/character/Walk/walk_left_down.png", 48, 64),
-                                    "left_up": Animation("assets/character/Walk/walk_left_up.png", 48, 64),
-                                    "right_down": Animation("assets/character/Walk/walk_right_down.png", 48, 64),
-                                    "right_up": Animation("assets/character/Walk/walk_right_up.png", 48, 64),
-                                    "up": Animation("assets/character/Walk/walk_up.png", 48, 64),
+                                    "down": Animation("assets/Custom/perso/face/marche/persofacemarche-Sheet.png", 64, 64, 4),
+                                    "left_down": Animation("assets/Custom/perso/gauche/marche/persogauchemarche-Sheet.png", 64, 64, 4),
+                                    "left_up": Animation("assets/Custom/perso/derrièregauche/marche/persoderrièreauchemarche-Sheet.png", 64, 64, 4),
+                                    "right_down": Animation("assets/Custom/perso/droite/marche/persodroitemarche-Sheet.png", 64, 64, 4),
+                                    "right_up": Animation("assets/Custom/perso/derrièredroite/marche/persoderrièredroite-Sheet.png", 64, 64, 4),
+                                    "up": Animation("assets/Custom/perso/derrière/marche/persoderrièremarche-Sheet.png", 64, 64, 4),
                                 }
                             }
                             logger.info("Loaded animations for player_skin_1")
