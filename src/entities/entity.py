@@ -62,9 +62,6 @@ class Entity():
         current_animation.frames_hitboxs[current_animation.current_frame].update(
             current_animation_frame)
 
-        print(current_animation.frames_hitboxs[current_animation.current_frame].get_coordinates(
-            current_animation_frame.get_rect(center=draw_position)))
-
         if self.debug:
             current_animation.frames_hitboxs[current_animation.current_frame].draw(
                 screen, current_animation_frame.get_rect(center=draw_position), (0, 0, 255))
