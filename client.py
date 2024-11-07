@@ -6,7 +6,9 @@ from loguru import logger
 def main():
     parser = argparse.ArgumentParser(description='Client Application')
     parser.add_argument('--debug', action='store_true',
-                        help='Activer le mode debug')
+                        help='Activate debug mode')
+    parser.add_argument('--window', action='store_true',
+                        help='Start the game in windowed mode')
     args = parser.parse_args()
 
     window_game_size = (1280, 720)
@@ -16,7 +18,7 @@ def main():
         logger.add(lambda msg: print(msg, end=''),
                    level="DEBUG", colorize=True)
         logger.debug("DEBUG MODE")
-        window_game_size = (window_game_size[0] // 2, window_game_size[1] // 2)
+        window_game_size = (800, 400)
     else:
         logger.remove()
         logger.add(lambda msg: print(msg, end=''), level="INFO", colorize=True)
@@ -27,10 +29,11 @@ def main():
         game_client = GameClient(
             width=window_game_size[0],  # window size
             height=window_game_size[1],  # window size
-            config_path='configs/host.json',  # patsh to the config file configs/host.json
-            logo_path='assets/beef.png')  # logo of the game
-        logger.debug(f"GameClient initialized with width={
-                     window_game_size[0]}, height={window_game_size[1]}")
+            config_path='configs/host.json',  # path to the config file configs/host.json
+            logo_path='assets\Custom\perso.png',  # logo of the game
+            windowed=args.window 
+        )
+        logger.debug(f"GameClient initialized with width={window_game_size[0]}, height={window_game_size[1]}, windowed={args.window}")
         game_client.run(debug=args.debug)  # run the game
         logger.info("Game client is running")
     except Exception as e:

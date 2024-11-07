@@ -6,6 +6,7 @@ from loguru import logger
 
 
 class GameClient:
+    def __init__(self, width, height, config_path, logo_path, windowed=False):
         self.width = width  # window size
         self.height = height  # window size
         self.config_path = config_path  # path to the config file configs/host.json
@@ -17,19 +18,25 @@ class GameClient:
         self.client = None  # PlayerClient obj
         self.running = True
         self.debug = False
+        self.windowed = windowed
         self.target_position = None  # Add this line to store the target position
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
                     width, height, config_path, logo_path)
 
     def setup_screen(self):
-        self.screen = pygame.display.set_mode(
-            (self.width, self.height))  # create the game window
-        # set the game window title
+        if self.windowed:
+            self.screen = pygame.display.set_mode((self.width, self.height))
+        else:
+            self.width, self.height = pygame.display.Info(
+            ).current_w, pygame.display.Info().current_h
+            self.screen = pygame.display.set_mode(
+                (self.width, self.height), pygame.FULLSCREEN)
+            
         caption = "Hanger Client (Debug)" if self.debug else "Hanger Client"
         pygame.display.set_caption(caption)
-        pygame.mouse.set_visible(False)  # hide the default mouse cursor
-        logger.info("Screen setup with width: {}, height: {}",
-                    self.width, self.height)
+        pygame.mouse.set_visible(False)
+        logger.info("Screen setup with width: {}, height: {}, windowed: {}",
+                    self.width, self.height, self.windowed)
 
     def load_assets(self):
         self.font = pygame.font.Font(None, 24)  # load the font for the game
