@@ -119,37 +119,6 @@ class GameClient:
         self.client.send_position()
         logger.debug("Player position updated to: {}", self.client.position)
 
-    def attack(self):
-        if self.attacking:
-            if self.attack_frame >= len(self.attack_ani_R):
-                self.attack_frame = 0
-                self.attacking = False
-            else:
-                if self.client.player.anim_current_direction in ["right", "right_up", "right_down"]:
-                    self.client.player.image = self.attack_ani_R[self.attack_frame]
-                else:
-                    self.client.player.image = self.attack_ani_L[self.attack_frame]
-                
-                # Check for nearby entities to apply damage
-                for player in self.client.players.values():
-                    if player.id != self.client.player_id:
-                        distance = ((player.position[0] - self.client.player.position[0]) ** 2 + (player.position[1] - self.client.player.position[1]) ** 2) ** 0.5
-                        if distance < self.client.player.attack_range:
-                            if hasattr(player, 'entity') and hasattr(player.entity, 'hp'):
-                                player.entity.hp -= self.client.player.attack_damage
-                                logger.info("Player {} attacked Player {}. New health: {}", self.client.player.id, player.id, player.entity.hp)
-                            else:
-                                logger.warning("Player {} does not have a valid entity or hp attribute", player.id)
-                self.client.broadcast_entities()
-                self.attack_frame += 1
-        else:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_RETURN]:
-                self.attacking = True
-                self.attack_frame = 0
-                self.client.player.anim_current_action = "Attack"
-                self.client.send_action("Attack")
-
     def draw(self):
         # draw the entities of the game (using the tabs updated by handlers with server)
         # fill the screen with white color (reset the screen)
