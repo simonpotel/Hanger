@@ -17,11 +17,15 @@ class GameClient:
         self.client_logo = None  # pygame image obj
         self.clock = None  # pygame clock obj
         self.client = None  # PlayerClient obj
+<<<<<<< Updated upstream
         self.attacking = False
         self.attack_frame = 0
         self.attack_ani_R = []  # Define attack_ani_R as an empty list or load the actual animation frames
         self.attack_ani_L = []  # Define attack_ani_L as an empty list or load the actual animation frames
         self.entity = Entity(id=0, name="default", uuid="0000", position=(0, 0), asset_path="", type="default", render=True)  # Ensure entity is defined
+=======
+        self.attack_type = 0 # attack type of the player
+>>>>>>> Stashed changes
         self.running = True
         self.debug = False
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
@@ -110,6 +114,15 @@ class GameClient:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[0] += self.client.speed * dt
 
+        if keys[pygame.K_r] or keys[pygame.K_t]:
+            #self.client.player.anim_current_action = "Attack"
+            #self.attack_test()
+            if keys[pygame.K_r]:
+                self.attack_type = 1
+            elif keys[pygame.K_t]:
+                self.attack_type = 2
+
+
         self.client.send_position()
         logger.debug("Player position updated to: {}", self.client.position)
 
@@ -194,8 +207,27 @@ class GameClient:
             self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2,
                              mouse_y - cursor_image.get_height() // 2))  # draw the cursor on the screen
 
+        if self.attack_type == 1:
+            #self.attack_type = 0
+            self.attack_test()
+
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
+
+
+    def attack_test(self):
+
+        try:
+            objetanim = self.client.player.anim_animations[self.client.player.anim_current_action][self.client.player.anim_current_direction]
+            width = objetanim.frame_width
+            height = objetanim.frame_height
+
+            x, y = self.client.player.position[0], self.client.player.position[1]
+
+            attacking_rect = pygame.Rect(x - width // 2, y - height // 2, 2 * width, height)
+            pygame.draw.rect(self.screen, (255, 0, 0), attacking_rect)
+        except Exception as e:
+            logger.error("Error in attack_test: {}", e)
 
     def run(self, debug=False):
         # run the game
