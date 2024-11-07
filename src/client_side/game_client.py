@@ -169,9 +169,24 @@ class GameClient:
             self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2,
                              mouse_y - cursor_image.get_height() // 2))  # draw the cursor on the screen
 
+        animation = self.client.player.anim_animations[self.client.player.anim_current_action][self.client.player.anim_current_direction]
+        hitbox_x, hitbox_y, hitbox_width, hitbox_height = animation.frames_hitboxs[animation.current_frame].get_coordinates(animation.get_current_frame().get_rect(center=(self.client.player.position[0], self.client.player.position[1])))
+            
         if self.client.attack_type == 1:
-            #self.attack_type = 0
-            self.attack_test()
+            taille_attaque = (64, 64)
+            couleur = (255, 0, 0)
+            position = (self.client.player.position[0] - camera_offset_x + hitbox_width//2, 
+                self.client.player.position[1] - camera_offset_y - hitbox_height//2)
+            pygame.draw.rect(self.screen, couleur, (position[0], position[1], taille_attaque[0], taille_attaque[1]), 1)
+
+        camera_offset_label = self.font.render(f"Camera Offset: ({camera_offset_x}, {camera_offset_y})", True, (0, 0, 0))
+        self.screen.blit(camera_offset_label, (10, 10))
+
+        player_position_label = self.font.render(f"Player Position: ({self.client.player.position[0]}, {self.client.player.position[1]})", True, (0, 0, 0))
+        self.screen.blit(player_position_label, (10, 30))
+
+        hitbox_label = self.font.render(f"Hitbox: ({hitbox_x}, {hitbox_y}, {hitbox_width}, {hitbox_height})", True, (0, 0, 0))
+        self.screen.blit(hitbox_label, (10, 50))
 
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
