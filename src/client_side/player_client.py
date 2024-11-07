@@ -5,9 +5,10 @@ from loguru import logger
 from src.maps import Maps
 
 class PlayerClient:
-    def __init__(self, ip='127.0.0.1', port=65432):
+    def __init__(self, ip='127.0.0.1', port=65432, debug=False):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create a socket object for the client side 
         self.conn.connect((ip, port)) # connect to the server
+        self.debug = debug 
         self.position = [400, 300] # position of the player
         self.player_id = None # id of the player
         self.player_uuid = None # uuid of the player
@@ -53,7 +54,8 @@ class PlayerClient:
                     position=self.position,
                     asset_path=player_asset_path,
                     type=int(player_type),
-                    render=True
+                    render=True,
+                    debug=self.debug
                 )
                 self.players[self.player_id] = self.player
                 logger.info(f"Received ID: {self.player_id}, UUID: {self.player_uuid}")
@@ -76,7 +78,8 @@ class PlayerClient:
                                     position=(p['state']['x'], p['state']['y']),
                                     asset_path=p['asset_path'],
                                     type=1,
-                                    render=True)
+                                    render=True,
+                                    debug=self.debug)
                         self.players[p['id']].hp = p['hp']
                         self.players[p['id']].name = p['name']
                         self.players[p['id']].type = p['type']

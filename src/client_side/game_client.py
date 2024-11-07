@@ -54,7 +54,7 @@ class GameClient:
             raise
 
     def start_client(self, ip, port):
-        self.client = PlayerClient(ip=ip, port=port)
+        self.client = PlayerClient(ip=ip, port=port, debug=self.debug)
         # start the thread to receive updates from the server
         threading.Thread(target=self.client.receive_updates,
                          daemon=True).start()

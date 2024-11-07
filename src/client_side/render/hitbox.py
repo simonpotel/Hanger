@@ -12,9 +12,8 @@ class Hitbox:
 
     def draw(self, window, frame_rect):
         if self.visible:
-            hitbox_x = frame_rect.x + self.x_offset
-            hitbox_y = frame_rect.y + self.y_offset
-            pygame.draw.rect(window, (255, 0, 0), (hitbox_x, hitbox_y, self.width, self.height), 1)
+            hitbox_x, hitbox_y, width, height = self.get_coordinates(frame_rect)
+            pygame.draw.rect(window, (255, 0, 0), (hitbox_x, hitbox_y, width, height), 1)
 
     def get_coordinates(self, frame_rect):
         hitbox_x = frame_rect.x + self.x_offset
