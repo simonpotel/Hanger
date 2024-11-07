@@ -175,9 +175,23 @@ class GameClient:
         if self.client.attack_type == 1:
             taille_attaque = (64, 64)
             couleur = (255, 0, 0)
-            position = (self.client.player.position[0] - camera_offset_x + hitbox_width//2, 
-                self.client.player.position[1] - camera_offset_y - hitbox_height//2)
-            pygame.draw.rect(self.screen, couleur, (position[0], position[1], taille_attaque[0], taille_attaque[1]), 1)
+            position = None 
+            print(self.client.player.anim_current_direction)
+            match self.client.player.anim_current_direction:
+                case "right_down" | "right_up" | "right":
+                    position = (self.client.player.position[0] - camera_offset_x + hitbox_width//2, 
+                    self.client.player.position[1] - camera_offset_y - hitbox_height//2)
+                case "left_down" | "left_up" | "left":
+                    position = (self.client.player.position[0] - camera_offset_x - hitbox_width//2 - taille_attaque[0],
+                    self.client.player.position[1] - camera_offset_y - hitbox_height//2)
+                case "up":
+                    position = (self.client.player.position[0] - camera_offset_x - hitbox_width//2,
+                    self.client.player.position[1] - camera_offset_y - hitbox_height//2 - taille_attaque[1])
+                case "down":
+                    position = (self.client.player.position[0] - camera_offset_x - hitbox_width//2,
+                    self.client.player.position[1] - camera_offset_y + hitbox_height//2)
+            if position is not None:
+                pygame.draw.rect(self.screen, couleur, (position[0], position[1], taille_attaque[0], taille_attaque[1]), 1)
 
         camera_offset_label = self.font.render(f"Camera Offset: ({camera_offset_x}, {camera_offset_y})", True, (0, 0, 0))
         self.screen.blit(camera_offset_label, (10, 10))
