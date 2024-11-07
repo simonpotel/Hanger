@@ -107,7 +107,6 @@ class GameClient:
 
         if keys[pygame.K_r] or keys[pygame.K_t]:
             #self.client.player.anim_current_action = "Attack"
-            #self.attack_test()
             if keys[pygame.K_r]:
                 self.client.attack_type = 1
             elif keys[pygame.K_t]:
@@ -204,21 +203,7 @@ class GameClient:
 
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
-
-
-    def attack_test(self):
-
-        try:
-            objetanim = self.client.player.anim_animations[self.client.player.anim_current_action][self.client.player.anim_current_direction]
-            width = objetanim.frame_width
-            height = objetanim.frame_height
-
-            x, y = self.client.player.position[0], self.client.player.position[1]
-
-            attacking_rect = pygame.Rect(x - width // 2, y - height // 2, 2 * width, height)
-            pygame.draw.rect(self.screen, (255, 0, 0), attacking_rect)
-        except Exception as e:
-            logger.error("Error in attack_test: {}", e)
+       
 
     def run(self, debug=False):
         # run the game
