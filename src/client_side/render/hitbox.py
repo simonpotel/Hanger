@@ -1,5 +1,6 @@
 import pygame
 
+
 class Hitbox:
     def __init__(self, frame, visible=True):
         self.visible = visible
@@ -10,10 +11,12 @@ class Hitbox:
         self.width, self.height = bounding_rect.width, bounding_rect.height
         self.x_offset, self.y_offset = bounding_rect.topleft
 
-    def draw(self, window, frame_rect):
+    def draw(self, window, frame_rect, color=(255, 0, 0)):
         if self.visible:
-            hitbox_x, hitbox_y, width, height = self.get_coordinates(frame_rect)
-            pygame.draw.rect(window, (255, 0, 0), (hitbox_x, hitbox_y, width, height), 1)
+            hitbox_x, hitbox_y, width, height = self.get_coordinates(
+                frame_rect)
+            pygame.draw.rect(
+                window, color, (hitbox_x, hitbox_y, width, height), 1)
 
     def get_coordinates(self, frame_rect):
         hitbox_x = frame_rect.x + self.x_offset
@@ -22,3 +25,8 @@ class Hitbox:
 
     def set_visibility(self, visible):
         self.visible = visible
+        
+    def element_inside_hitbox(self, x, y, width, height):
+        hitbox_x, hitbox_y, hitbox_width, hitbox_height = self.get_coordinates(
+            pygame.Rect(x, y, width, height))
+        return hitbox_x < x + width and hitbox_x + self.width > x and hitbox_y < y + height and hitbox_y + self.height > y

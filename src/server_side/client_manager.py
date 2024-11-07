@@ -15,7 +15,7 @@ class ClientManager:
                 uuid=str(uuid.uuid4()),
                 position=[400, 300],
                 asset_path="player_skin_1",
-                type=1, render=False) # create a new entity for the client (but not render it)
+                type=1, render=False, debug=False) # create a new entity for the client (but not render it)
             logger.info(f"Entity created for client {client_id} with UUID {self.entity.uuid}")
         except Exception as e:
             logger.error(f"Failed to create entity for client {client_id}: {e}")

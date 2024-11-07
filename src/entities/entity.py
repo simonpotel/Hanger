@@ -67,7 +67,7 @@ class Entity():
 
         if self.debug:
             current_animation.frames_hitboxs[current_animation.current_frame].draw(
-                screen, current_animation_frame.get_rect(center=draw_position))
+                screen, current_animation_frame.get_rect(center=draw_position), (0, 0, 255))
 
         if extra:
             id_text = font.render(f'ID: {self.id}', True, color)
