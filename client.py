@@ -30,7 +30,7 @@ def main():
             width=window_game_size[0],  # window size
             height=window_game_size[1],  # window size
             config_path='configs/host.json',  # path to the config file configs/host.json
-            logo_path='assets\Custom\perso.png',  # logo of the game
+            logo_path='assets/Custom/perso.png',  # logo of the game
             windowed=args.window 
         )
         logger.debug(f"GameClient initialized with width={window_game_size[0]}, height={window_game_size[1]}, windowed={args.window}")
