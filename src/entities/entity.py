@@ -57,6 +57,8 @@ class Entity():
                     (draw_position[0] - current_animation.frame_width * current_animation.scale_factor // 2,
                      draw_position[1] - current_animation.frame_height * current_animation.scale_factor // 2))
 
+        current_animation.frames_hitboxs[current_animation.current_frame].draw(screen, current_animation.get_current_frame().get_rect(center=draw_position))
+
         if extra:
             id_text = font.render(f'ID: {self.id}', True, color)
             id_rect = id_text.get_rect(center=(draw_position[0]-20, draw_position[1] + 50))
