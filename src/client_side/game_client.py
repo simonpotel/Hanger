@@ -17,15 +17,7 @@ class GameClient:
         self.client_logo = None  # pygame image obj
         self.clock = None  # pygame clock obj
         self.client = None  # PlayerClient obj
-<<<<<<< Updated upstream
-        self.attacking = False
-        self.attack_frame = 0
-        self.attack_ani_R = []  # Define attack_ani_R as an empty list or load the actual animation frames
-        self.attack_ani_L = []  # Define attack_ani_L as an empty list or load the actual animation frames
-        self.entity = Entity(id=0, name="default", uuid="0000", position=(0, 0), asset_path="", type="default", render=True)  # Ensure entity is defined
-=======
         self.attack_type = 0 # attack type of the player
->>>>>>> Stashed changes
         self.running = True
         self.debug = False
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
