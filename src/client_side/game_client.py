@@ -135,7 +135,7 @@ class GameClient:
         camera_offset_x = self.client.player.position[0] - self.width // 2
         # camera offset y center
         camera_offset_y = self.client.player.position[1] - self.height // 2
-
+        #map
         for map_name, assets in self.client.maps.maps_animations.items():
             for asset_name, animation in assets.items():
                 animation.update()  # update the animation
@@ -155,6 +155,7 @@ class GameClient:
 
                 self.screen.blit(frame, position)
 
+        # players
         for player in n_players:  # do this for every player in the game
             if player.id == self.client.player_id:
                 # update the player in the client side if needed in other part of the code
@@ -171,6 +172,7 @@ class GameClient:
             player.draw(self.screen, self.font,
                         (0, 0, 0), extra, draw_position)
 
+        # ui
         if pygame.mouse.get_focused():  # if the mouse is focused on the game window
             cursor_image = pygame.image.load(
                 'assets/Tiny Swords/UI/Pointers/01.png')  # load the cursor image
@@ -180,6 +182,13 @@ class GameClient:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2,
                              mouse_y - cursor_image.get_height() // 2))  # draw the cursor on the screen
+        
+        if self.debug:
+            camera_offset_label = self.font.render(f"Camera Offset: ({camera_offset_x}, {camera_offset_y})", True, (0, 0, 0))
+            self.screen.blit(camera_offset_label, (10, 10))
+
+            player_position_label = self.font.render(f"Player Position: ({self.client.player.position[0]}, {self.client.player.position[1]})", True, (0, 0, 0))
+            self.screen.blit(player_position_label, (10, 30))
 
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
@@ -264,16 +273,14 @@ class GameClient:
         self.clock = pygame.time.Clock()
         ip, port = self.read_config()
         self.start_client(ip, port)
-
         while self.running:
             # get the delta time between each frame (to have a smooth game)
             cloak = self.clock.tick(120)
-            dt = cloak/1000
+            dt = cloak / 1000
             self.handle_events()  # handle the events of the game
             self.update(dt)  # update the game
             self.move_to_mouse(dt)  # move the player to the mouse position
             self.draw()  # draw the game
-
         self.client.close()  # close the connection with the server
         pygame.quit()  # quit the game
         logger.info("Game closed")
