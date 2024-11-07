@@ -54,7 +54,7 @@ class GameClient:
             raise
 
     def start_client(self, ip, port):
-        self.client = PlayerClient(ip=ip, port=port)
+        self.client = PlayerClient(ip=ip, port=port, debug=self.debug)
         # start the thread to receive updates from the server
         threading.Thread(target=self.client.receive_updates,
                          daemon=True).start()
@@ -129,6 +129,15 @@ class GameClient:
                 position = (
                     asset_properties['x'] - camera_offset_x, asset_properties['y'] - camera_offset_y)
                 # draw the animation at the specified position
+
+                hitbox = animation.frames_hitboxs[animation.current_frame]
+                hitbox.update(frame)
+
+                if self.debug:
+                    hitbox_rect = frame.get_rect(center=(
+                        position[0] + frame.get_width() // 2, position[1] + frame.get_height() // 2))
+                    hitbox.draw(self.screen, hitbox_rect, (0, 255, 0))
+
                 self.screen.blit(frame, position)
 
         for player in n_players:  # do this for every player in the game
