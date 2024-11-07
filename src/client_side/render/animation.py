@@ -1,5 +1,6 @@
 import pygame
 from loguru import logger
+from src.client_side.render.hitbox import Hitbox
 
 
 class Animation:
@@ -10,6 +11,7 @@ class Animation:
         self.frame_height = frame_height
         self.scale_factor = scale_factor
         self.frames = []
+        self.frames_hitboxs = []
         self.current_frame = 0
         self.animation_speed = 0.065
         self.animation_timer = 0
@@ -32,6 +34,9 @@ class Animation:
                 frame, (frame_width * scale_factor, frame_height * scale_factor))
             self.frames.append(scaled_frame)
             logger.debug("Frame {} added to frames list", i)
+            hitbox = Hitbox(scaled_frame)
+            self.frames_hitboxs.append(hitbox)
+            logger.debug("Hitbox for frame {} added to frames_hitboxs list", i)
 
     def update(self):
         self.animation_timer += self.animation_speed
