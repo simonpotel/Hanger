@@ -16,6 +16,7 @@ class Entity():
         self.anim_current_direction = "down"
         self.anim_current_action = "Idle"
         self.anim_animations = {}
+        self.attack_type = 0
 
         if render:
             match type:

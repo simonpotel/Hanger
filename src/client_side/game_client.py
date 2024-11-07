@@ -17,7 +17,6 @@ class GameClient:
         self.client_logo = None  # pygame image obj
         self.clock = None  # pygame clock obj
         self.client = None  # PlayerClient obj
-        self.attack_type = 0 # attack type of the player
         self.running = True
         self.debug = False
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
@@ -110,11 +109,13 @@ class GameClient:
             #self.client.player.anim_current_action = "Attack"
             #self.attack_test()
             if keys[pygame.K_r]:
-                self.attack_type = 1
+                self.client.attack_type = 1
             elif keys[pygame.K_t]:
-                self.attack_type = 2
+                self.client.attack_type = 2
+        else:
+            self.client.attack_type = 0
 
-
+        self.client.send_attack()
         self.client.send_position()
         logger.debug("Player position updated to: {}", self.client.position)
 
@@ -199,7 +200,7 @@ class GameClient:
             self.screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2,
                              mouse_y - cursor_image.get_height() // 2))  # draw the cursor on the screen
 
-        if self.attack_type == 1:
+        if self.client.attack_type == 1:
             #self.attack_type = 0
             self.attack_test()
 

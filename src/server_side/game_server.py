@@ -69,6 +69,10 @@ class GameServer:
                             client.entity.anim_current_action = anim_current_action # update the current action of the player
                             client.entity.anim_current_direction = anim_current_direction # update the current direction of the player
                         logger.debug(f"Updated position for client {client_id}: x={x}, y={y}, action={anim_current_action}, direction={anim_current_direction}")
+                    elif message.startswith("ATTACK"):
+                        _, attack_type = message.split()
+                        client.entity.attack_type = int(attack_type)
+
             except Exception as e:
                 logger.error(f"Error handling client {client_id}: {e}")
                 break
