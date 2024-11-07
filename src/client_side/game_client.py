@@ -6,7 +6,6 @@ from loguru import logger
 
 
 class GameClient:
-    def __init__(self, width, height, config_path, logo_path):
         self.width = width  # window size
         self.height = height  # window size
         self.config_path = config_path  # path to the config file configs/host.json
@@ -18,6 +17,7 @@ class GameClient:
         self.client = None  # PlayerClient obj
         self.running = True
         self.debug = False
+        self.target_position = None  # Add this line to store the target position
         logger.info("GameClient initialized with width: {}, height: {}, config_path: {}, logo_path: {}",
                     width, height, config_path, logo_path)
 
@@ -79,30 +79,38 @@ class GameClient:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_up"
             self.client.position[1] -= self.client.speed * dt
             self.client.position[0] -= self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_z] and keys[pygame.K_d]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_up"
             self.client.position[1] -= self.client.speed * dt
             self.client.position[0] += self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_s] and keys[pygame.K_q]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
             self.client.position[1] += self.client.speed * dt
             self.client.position[0] -= self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_s] and keys[pygame.K_d]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[1] += self.client.speed * dt
             self.client.position[0] += self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_z]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "up"
             self.client.position[1] -= self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_s]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "down"
             self.client.position[1] += self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_q]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
             self.client.position[0] -= self.client.speed * dt
+            self.target_position = None
         elif keys[pygame.K_d]:
             self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
             self.client.position[0] += self.client.speed * dt
+            self.target_position = None
 
         self.client.send_position()
         logger.debug("Player position updated to: {}", self.client.position)
@@ -169,6 +177,76 @@ class GameClient:
         pygame.display.flip()  # update the screen
         logger.debug("Screen drawn with {} players", len(n_players))
 
+    def move_to_mouse(self, dt):
+        if not self.client.player:
+            return
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_z] or keys[pygame.K_s] or keys[pygame.K_q] or keys[pygame.K_d]:
+            return
+
+        animation = self.client.player.anim_animations[
+            self.client.player.anim_current_action][self.client.player.anim_current_direction]
+        hitbox_x, hitbox_y, hitbox_width, hitbox_height = animation.frames_hitboxs[animation.current_frame].get_coordinates(
+            animation.get_current_frame().get_rect(
+                center=(self.client.player.position[0], self.client.player.position[1]))
+        )
+
+        if pygame.mouse.get_pressed()[0]:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            adjusted_mouse_x = mouse_x + \
+                (self.client.player.position[0] - self.width // 2)
+            adjusted_mouse_y = mouse_y + \
+                (self.client.player.position[1] - self.height // 2)
+            self.target_position = (adjusted_mouse_x, adjusted_mouse_y)
+
+        if self.target_position:
+            target_x, target_y = self.target_position
+            player_x, player_y = self.client.player.position
+            vector_x = target_x - player_x
+            vector_y = target_y - player_y
+            distance = (vector_x**2 + vector_y**2)**0.5
+            if distance > 0:
+                vector_x /= distance
+                vector_y /= distance
+                self.client.position[0] += vector_x * self.client.speed * dt
+                self.client.position[1] += vector_y * self.client.speed * dt
+                if abs(vector_x) > abs(vector_y):
+                    if vector_x > 0:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "right_down"
+                    else:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "left_down"
+                else:
+                    if vector_y > 0:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "down"
+                    else:
+                        self.client.player.anim_current_action, self.client.player.anim_current_direction = "Walk", "up"
+                self.client.send_position()
+                logger.debug("Player moved to target position: {}",
+                             self.client.position)
+            if distance < self.client.speed * dt:
+                self.target_position = None
+        else:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            adjusted_mouse_x = mouse_x + \
+                (self.client.player.position[0] - self.width // 2)
+            adjusted_mouse_y = mouse_y + \
+                (self.client.player.position[1] - self.height // 2)
+            vector_x = adjusted_mouse_x - self.client.player.position[0]
+            vector_y = adjusted_mouse_y - self.client.player.position[1]
+            if abs(vector_x) > abs(vector_y):
+                if vector_x > 0:
+                    self.client.player.anim_current_direction = "right_down"
+                else:
+                    self.client.player.anim_current_direction = "left_down"
+            else:
+                if vector_y > 0:
+                    self.client.player.anim_current_direction = "down"
+                else:
+                    self.client.player.anim_current_direction = "up"
+            logger.debug("Player head direction updated to: {}",
+                         self.client.player.anim_current_direction)
+
     def run(self, debug=False):
         # run the game
         self.debug = debug
@@ -186,6 +264,7 @@ class GameClient:
             dt = cloak/1000
             self.handle_events()  # handle the events of the game
             self.update(dt)  # update the game
+            self.move_to_mouse(dt)  # move the player to the mouse position
             self.draw()  # draw the game
 
         self.client.close()  # close the connection with the server
