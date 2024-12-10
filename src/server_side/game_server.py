@@ -72,7 +72,27 @@ class GameServer:
                     elif message.startswith("ATTACK"):
                         _, attack_type = message.split()
                         client.entity.attack_type = int(attack_type)
-
+                        with self.lock:
+                            if client.entity.attack_type == 1:
+                                for other_client in self.clients.values():
+                                    if client.entity.anim_current_direction == 'up' and (abs(other_client.entity.state['x'] - client.entity.state['x']) <= 32 and
+                                        other_client.entity.state['y'] < client.entity.state['y'] and abs(other_client.entity.state['y'] - client.entity.state['y']) <= 32):
+                                        other_client.entity.hp -= 10
+                                        logger.debug(f"Entity {other_client.entity.id} took damage from client {client_id}. New HP: {other_client.entity.hp}")
+                                    elif client.entity.anim_current_direction == 'down' and (abs(other_client.entity.state['x'] - client.entity.state['x']) <= 32 and
+                                        other_client.entity.state['y'] > client.entity.state['y'] and abs(other_client.entity.state['y'] - client.entity.state['y']) <= 32):
+                                        other_client.entity.hp -= 10
+                                        logger.debug(f"Entity {other_client.entity.id} took damage from client {client_id}. New HP: {other_client.entity.hp}")
+                                    elif client.entity.anim_current_direction == 'left' and (abs(other_client.entity.state['y'] - client.entity.state['y']) <= 32 and
+                                        other_client.entity.state['x'] < client.entity.state['x'] and abs(other_client.entity.state['x'] - client.entity.state['x']) <= 32):
+                                        other_client.entity.hp -= 10
+                                        logger.debug(f"Entity {other_client.entity.id} took damage from client {client_id}. New HP: {other_client.entity.hp}")
+                                    elif client.entity.anim_current_direction == 'right' and (abs(other_client.entity.state['y'] - client.entity.state['y']) <= 32 and
+                                        other_client.entity.state['x'] > client.entity.state['x'] and abs(other_client.entity.state['x'] - client.entity.state['x']) <= 32):
+                                        other_client.entity.hp -= 10
+                                        logger.debug(f"Entity {other_client.entity.id} took damage from client {client_id}. New HP: {other_client.entity.hp}")
+                                
+                            #elif client.entity.attack_type == 2:
             except Exception as e:
                 logger.error(f"Error handling client {client_id}: {e}")
                 break
